@@ -25,7 +25,7 @@ export default function LoginPage() {
       toast.error(res.error);
     } else {
       toast.success("Successfully logged in!");
-      router.push("/");
+      router.push("/dashboard");
     }
   }
 
