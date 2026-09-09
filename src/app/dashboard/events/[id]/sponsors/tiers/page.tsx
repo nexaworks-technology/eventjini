@@ -41,19 +41,21 @@ export default function SponsorsTiersPage() {
     if (!newName || !newPrice || !newSlots) return;
 
     try {
-      const added = await createSponsorshipTier({
+      const added = await createSponsorshipTier(eventId, {
         name: newName,
         price: Number(newPrice),
         slotsTotal: Number(newSlots),
         slotsAvailable: Number(newSlots),
         benefits: newBenefits.split(",").map((b) => b.trim()).filter((b) => b.length > 0),
       });
-      setTiers([...tiers, added]);
-      setIsAdding(false);
-      setNewName("");
-      setNewPrice("");
-      setNewSlots("");
-      setNewBenefits("");
+      if (added) {
+        setTiers([...tiers, added]);
+        setIsAdding(false);
+        setNewName("");
+        setNewPrice("");
+        setNewSlots("");
+        setNewBenefits("");
+      }
     } catch (error) {
       console.error("Error adding tier", error);
     }

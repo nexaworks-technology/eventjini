@@ -14,9 +14,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EventJini | The Premium Event OS",
+  title: {
+    template: "%s | EventJini",
+    default: "EventJini | Gen-Z Event Platform",
+  },
   description:
-    "Seamlessly manage, host, and experience events with EventJini.",
+    "Seamlessly manage, host, and experience events with EventJini. The premium Event Management SaaS.",
+  keywords: ["event management", "SaaS", "ticketing", "events", "Gen-Z events", "EventJini"],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://eventjini.com",
+    title: "EventJini | Gen-Z Event Platform",
+    description: "Seamlessly manage, host, and experience events with EventJini. The premium Event Management SaaS.",
+    siteName: "EventJini",
+    images: [
+      {
+        url: "https://eventjini.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "EventJini - The Premium Event OS",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EventJini | Gen-Z Event Platform",
+    description: "Seamlessly manage, host, and experience events with EventJini. The premium Event Management SaaS.",
+    images: ["https://eventjini.com/twitter-image.jpg"],
+    creator: "@eventjini",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
