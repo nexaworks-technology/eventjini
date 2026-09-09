@@ -48,6 +48,7 @@ export default async function EventLayout({
     { name: 'Tasks', href: `/dashboard/events/${eventId}/tasks`, icon: CheckSquare },
     { name: 'Budget', href: `/dashboard/events/${eventId}/budget`, icon: DollarSign },
     { name: 'Broadcast', href: `/dashboard/events/${eventId}/broadcast`, icon: Radio },
+    { name: 'Sponsors', href: `/dashboard/events/${eventId}/sponsors`, icon: DollarSign },
     { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine },
   ];
 
