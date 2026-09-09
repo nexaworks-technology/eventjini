@@ -96,8 +96,8 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
                     <Calendar className="w-5 h-5 text-cyan-400 mt-0.5" />
                     <div>
                       <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Date & Time</p>
-                      <p className="font-medium text-slate-200">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleDateString() : "TBA"}</p>
-                      <p className="text-sm text-slate-400">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleTimeString() : ""}</p>
+                      <p className="font-medium text-slate-200">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : "TBA"}</p>
+                      <p className="text-sm text-slate-400">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ""}</p>
                     </div>
                   </div>
 

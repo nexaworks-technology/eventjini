@@ -132,7 +132,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
                     <div className="space-y-2 mt-auto pt-4 border-t border-white/5">
                       <div className="flex items-center text-sm text-slate-400">
                         <Calendar className="w-4 h-4 mr-2 text-cyan-500" />
-                        <span>{new Date(event.start_date).toLocaleDateString()}</span>
+                        <span>{new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
                       <div className="flex items-center text-sm text-slate-400">
                         <MapPin className="w-4 h-4 mr-2 text-purple-500" />

@@ -77,7 +77,7 @@ export function EventsList({ events }: { events: any[] }) {
               <div className="space-y-2 mt-auto mb-6 text-sm text-slate-300">
                 <div className="flex items-center">
                   <CalendarIcon className="w-4 h-4 mr-2 text-cyan-400" />
-                  <span>{event.start_date ? new Date(event.start_date).toLocaleDateString() : event.date || "TBD"}</span>
+                  <span>{event.start_date ? new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : event.date || "TBD"}</span>
                 </div>
                 <div className="flex items-center">
                   <MapPinIcon className="w-4 h-4 mr-2 text-purple-400" />
