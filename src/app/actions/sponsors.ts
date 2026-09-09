@@ -107,20 +107,49 @@ export async function updateSponsorshipTier(id: string, data: Partial<Omit<Spons
   };
 }
 
-export async function getSponsorAnalytics(_eventId: string): Promise<SponsorAnalyticsData> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+export async function getSponsorAnalytics(eventId: string): Promise<SponsorAnalyticsData> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // Fetch all registrations for the event with their profile data
+  const { data: registrations, error } = await supabase
+    .from('registrations')
+    .select(`
+      user_id,
+      profiles:user_id (
+        job_title,
+        company_size
+      )
+    `)
+    .eq('event_id', eventId)
+    .neq('status', 'cancelled');
+
+  if (error || !registrations) {
+    return { jobTitles: [], companySizes: [] };
+  }
+
+  const jobTitleCounts: Record<string, number> = {};
+  const companySizeCounts: Record<string, number> = {};
+
+  registrations.forEach((reg: any) => {
+    const jobTitle = reg.profiles?.job_title || "Unspecified";
+    const companySize = reg.profiles?.company_size || "Unspecified";
+
+    jobTitleCounts[jobTitle] = (jobTitleCounts[jobTitle] || 0) + 1;
+    companySizeCounts[companySize] = (companySizeCounts[companySize] || 0) + 1;
+  });
+
+  const jobTitles = Object.entries(jobTitleCounts)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const companySizes = Object.entries(companySizeCounts)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  // If there's no data at all yet, provide an empty state rather than fake data
   return {
-    jobTitles: [
-      { name: "C-Level", value: 400 },
-      { name: "VP/Director", value: 300 },
-      { name: "Manager", value: 300 },
-      { name: "Individual Contributor", value: 200 },
-    ],
-    companySizes: [
-      { name: "1-50", value: 100 },
-      { name: "51-200", value: 250 },
-      { name: "201-1000", value: 450 },
-      { name: "1000+", value: 400 },
-    ],
+    jobTitles,
+    companySizes,
   };
 }

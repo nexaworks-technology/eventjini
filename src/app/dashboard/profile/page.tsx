@@ -3,7 +3,7 @@ import { ProfileForm } from "./profile-form";
 import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
-  const { profile, error } = await getProfile();
+  const { data: profile, error } = await getProfile();
 
   if (error || !profile) {
     // If not authenticated, the layout should technically catch it first, 

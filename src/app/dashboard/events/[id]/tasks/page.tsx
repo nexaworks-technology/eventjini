@@ -1,4 +1,4 @@
-import { getTasks } from "@/app/actions/event-management";
+import { getTasks } from "@/app/actions/os";
 import TasksClient from "./tasks-client";
 
 interface TasksPageProps {
@@ -7,7 +7,7 @@ interface TasksPageProps {
 
 export default async function TasksPage({ params }: TasksPageProps) {
   const resolvedParams = await params;
-  const { data: tasks } = await getTasks(resolvedParams.id);
+  const tasks = await getTasks(resolvedParams.id);
 
   return (
     <div className="flex-1 p-8 overflow-y-auto w-full h-full flex flex-col">

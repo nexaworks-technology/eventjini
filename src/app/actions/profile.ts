@@ -5,73 +5,70 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 export async function getProfile() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Not authenticated" };
+    if (authError || !user) {
+      return { error: "Unauthorized" };
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { data };
+  } catch (err: any) {
+    return { error: err?.message || "An unexpected error occurred" };
   }
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  return { 
-    profile: {
-      ...profile,
-      email: user.email, // Passing email down for convenience if needed
-    } 
-  };
 }
 
 export async function updateProfile(formData: FormData) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Not authenticated" };
+    if (authError || !user) {
+      return { error: "Unauthorized" };
+    }
+
+    const full_name = formData.get("full_name")?.toString();
+    const job_title = formData.get("job_title")?.toString();
+    const company_size = formData.get("company_size")?.toString();
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        full_name,
+        job_title,
+        company_size,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    revalidatePath("/settings/profile");
+    return { success: true };
+  } catch (err: any) {
+    return { error: err?.message || "An unexpected error occurred" };
   }
-
-  const phone = formData.get("phone") as string;
-  const location = formData.get("location") as string;
-  const linkedin_url = formData.get("linkedin_url") as string;
-  const dietary_preference = formData.get("dietary_preference") as string;
-  const tshirt_size = formData.get("tshirt_size") as string;
-  const bio = formData.get("bio") as string;
-  const opt_in_recommendations = formData.get("opt_in_recommendations") === "on";
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      phone,
-      location,
-      linkedin_url,
-      dietary_preference,
-      tshirt_size,
-      bio,
-      opt_in_recommendations,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  revalidatePath("/dashboard/profile");
-  return { success: true };
 }

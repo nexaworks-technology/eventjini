@@ -1,5 +1,8 @@
 import { getEventBySlug } from "@/app/actions/events";
+import { incrementPageViews } from "@/app/actions/os";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import EventRegistrationClient from "./registration-client";
 import { MapPin, Calendar, Clock, Info } from "lucide-react";
 import { FadeInUp, StaggerContainer, staggerChildVariants } from "@/components/animations/motion";
@@ -16,6 +19,13 @@ export default async function EventPage({ params }: EventPageProps) {
   if (error || !event) {
     notFound();
   }
+
+  // Increment real page views for analytics
+  await incrementPageViews(event.id).catch(console.error);
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Assuming registeredCount isn't fully implemented in DB yet, using 0 for now.
   const registeredCount = 0;
@@ -105,6 +115,7 @@ export default async function EventPage({ params }: EventPageProps) {
                 price={parseFloat(priceFormatted)}
                 capacity={event.capacity || 100}
                 registeredCount={registeredCount}
+                isLoggedIn={!!user}
               />
             </FadeInUp>
           </div>

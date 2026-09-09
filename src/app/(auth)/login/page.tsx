@@ -25,7 +25,14 @@ export default function LoginPage() {
       toast.error(res.error);
     } else {
       toast.success("Successfully logged in!");
-      router.push("/dashboard");
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect');
+      if (redirect) {
+        router.push(redirect);
+      } else {
+        router.push("/dashboard");
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { FadeInUp } from "@/components/animations/motion";
 import { Calendar, MapPin, CheckCircle2, Ticket as TicketIcon } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
+import { AddToCalendar } from "@/components/ui/add-to-calendar";
 
 interface TicketPageProps {
   params: Promise<{ slug: string }>;
@@ -100,13 +101,19 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 mb-4">
                     <MapPin className="w-5 h-5 text-purple-400 mt-0.5" />
                     <div>
                       <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Location</p>
                       <p className="font-medium text-slate-200">{ticket.event?.location_name || "TBA"}</p>
                     </div>
                   </div>
+                  
+                  {ticket.event && (
+                    <div className="pt-4 border-t border-white/5">
+                      <AddToCalendar event={ticket.event} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

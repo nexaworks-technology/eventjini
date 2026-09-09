@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { use } from "react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { FadeInUp } from "@/components/animations/motion";
 import { toast } from "sonner";
 import { Send, Users, Type, AlignLeft } from "lucide-react";
+import { sendBroadcast } from "@/app/actions/broadcast";
 
-export default function BroadcastPage() {
+export default function BroadcastPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
+  const eventId = unwrappedParams.id;
+
   const [recipient, setRecipient] = useState("all");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -20,13 +25,18 @@ export default function BroadcastPage() {
     }
     
     setIsSending(true);
-    // Mock sending delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    const response = await sendBroadcast(eventId, recipient, subject, body);
+    
     setIsSending(false);
     
-    toast.success("Broadcast sent successfully!");
-    setSubject("");
-    setBody("");
+    if (response.error) {
+      toast.error(response.error);
+    } else {
+      toast.success(`Broadcast sent successfully to ${response.count} attendees!`);
+      setSubject("");
+      setBody("");
+    }
   };
 
   return (

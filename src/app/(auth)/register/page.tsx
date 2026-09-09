@@ -24,8 +24,15 @@ export default function RegisterPage() {
     if (res?.error) {
       toast.error(res.error);
     } else {
-      toast.success("Account created! Please check your email to verify or log in.");
-      router.push("/login");
+      toast.success("Account created successfully!");
+      // If there's a redirect query parameter, pass it to login
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect');
+      if (redirect) {
+        router.push(`/login?redirect=${encodeURIComponent(redirect)}`);
+      } else {
+        router.push("/login");
+      }
     }
   }
 

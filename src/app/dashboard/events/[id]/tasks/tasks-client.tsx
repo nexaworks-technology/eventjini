@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { updateTaskStatus, createTask } from "@/app/actions/event-management";
+import { updateTaskStatus, createTask } from "@/app/actions/os";
 import { Plus } from "lucide-react";
 import { FadeInUp } from "@/components/animations/motion";
 
@@ -51,9 +51,9 @@ export default function TasksClient({ initialTasks, eventId }: { initialTasks: T
     const newTask = { id: optimisticId, title, status: "To Do" };
     setTasks(prev => [...prev, newTask]);
 
-    const res = await createTask(eventId, title);
-    if (res.data) {
-      setTasks(prev => prev.map(t => t.id === optimisticId ? (res.data as Task) : t));
+    const res = await createTask({ event_id: eventId, title, status: "To Do" });
+    if (res) {
+      setTasks(prev => prev.map(t => t.id === optimisticId ? (res as Task) : t));
     }
   };
 

@@ -6,30 +6,8 @@ import { Users, DollarSign, CheckCircle, Eye } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StaggerContainer, FadeInUp, staggerChildVariants } from "@/components/animations/motion";
 import { motion } from "framer-motion";
+import { getEventStats } from "@/app/actions/os";
 import { use } from "react";
-
-// Mock API call to get stats
-const getEventStats = async (id: string) => {
-  return new Promise<any>((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalRevenue: 15400,
-        registrations: 342,
-        checkIns: 210,
-        pageViews: 1250,
-        trend: [
-          { date: "Mon", registrations: 20 },
-          { date: "Tue", registrations: 45 },
-          { date: "Wed", registrations: 30 },
-          { date: "Thu", registrations: 80 },
-          { date: "Fri", registrations: 60 },
-          { date: "Sat", registrations: 110 },
-          { date: "Sun", registrations: 342 },
-        ],
-      });
-    }, 500);
-  });
-};
 
 export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -48,9 +26,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }
 
   const kpis = [
-    { label: "Total Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-cyan-500", bg: "bg-cyan-500/10" },
-    { label: "Registrations", value: stats.registrations, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Check-ins", value: stats.checkIns, icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Total Revenue", value: `$${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { label: "Registrations", value: stats.registrationsCount, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Check-ins", value: stats.checkInsCount, icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { label: "Page Views", value: stats.pageViews.toLocaleString(), icon: Eye, color: "text-blue-500", bg: "bg-blue-500/10" },
   ];
 

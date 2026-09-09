@@ -8,23 +8,45 @@ import { ScanLine, CheckCircle } from "lucide-react";
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { Button } from "@/components/ui/button";
 
-export default function ScannerPage() {
+import { checkInGuest } from "@/app/actions/os";
+
+import { Loader2, XCircle } from "lucide-react";
+
+export default function ScannerPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = require("react").use(params);
+  const eventId = resolvedParams.id;
+  
   const [isScanning, setIsScanning] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [scanResult, setScanResult] = useState<{ success: boolean; message: string } | null>(null);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
 
-  const handleScan = (result: any[]) => {
-    if (!isScanning) return;
+  const handleScan = async (result: any[]) => {
+    if (!isScanning || isProcessing) return;
     
     if (result && result.length > 0) {
       const value = result[0].rawValue;
       if (value) {
         setIsScanning(false);
+        setIsProcessing(true);
         setLastScanned(value);
-        toast.success(`Checked In: ${value}`);
+        
+        // Call backend to actually check in the guest
+        const response = await checkInGuest(eventId, value);
+        
+        setScanResult(response);
+        setIsProcessing(false);
+        
+        if (response.success) {
+          toast.success(response.message);
+        } else {
+          toast.error(response.message);
+        }
         
         // Resume scanning after 3 seconds automatically
         setTimeout(() => {
           setIsScanning(true);
+          setScanResult(null);
           setLastScanned(null);
         }, 3000);
       }
@@ -42,15 +64,25 @@ export default function ScannerPage() {
         <GlassCard className="p-8 flex flex-col items-center justify-center space-y-8 min-h-[500px] relative overflow-hidden">
           {/* Header indicator */}
           <div className="flex items-center gap-3">
-            <div className={`p-3 rounded-xl ${isScanning ? 'bg-cyan-500/20 text-cyan-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
-              {isScanning ? <ScanLine className="w-6 h-6 animate-pulse" /> : <CheckCircle className="w-6 h-6" />}
+            <div className={`p-3 rounded-xl ${
+              isScanning ? 'bg-cyan-500/20 text-cyan-500' : 
+              isProcessing ? 'bg-amber-500/20 text-amber-500' :
+              scanResult?.success ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'
+            }`}>
+              {isScanning ? <ScanLine className="w-6 h-6 animate-pulse" /> : 
+               isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> :
+               scanResult?.success ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">
-                {isScanning ? "Ready to Scan" : "Success"}
+                {isScanning ? "Ready to Scan" : 
+                 isProcessing ? "Verifying..." :
+                 scanResult?.success ? "Success" : "Invalid Ticket"}
               </h2>
               <p className="text-sm text-white/50">
-                {isScanning ? "Point camera at the QR code" : "Attendee checked in"}
+                {isScanning ? "Point camera at the QR code" : 
+                 isProcessing ? "Checking database..." :
+                 scanResult?.message}
               </p>
             </div>
           </div>
@@ -65,11 +97,23 @@ export default function ScannerPage() {
                   video: "object-cover w-full h-full"
                 }}
               />
-            ) : (
+            ) : isProcessing ? (
+              <div className="absolute inset-0 bg-amber-500/10 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                <Loader2 className="w-16 h-16 text-amber-500 mb-4 animate-spin" />
+                <p className="text-white font-medium mb-1">Verifying Ticket...</p>
+                <p className="text-amber-400 text-sm break-all font-mono opacity-50">{lastScanned}</p>
+              </div>
+            ) : scanResult?.success ? (
               <div className="absolute inset-0 bg-emerald-500/10 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
                 <CheckCircle className="w-16 h-16 text-emerald-500 mb-4" />
-                <p className="text-white font-medium mb-1">Checked In Successfully</p>
-                <p className="text-emerald-400 text-sm break-all">{lastScanned}</p>
+                <p className="text-white font-medium mb-1">{scanResult.message}</p>
+                <p className="text-emerald-400 text-sm break-all font-mono opacity-50">{lastScanned}</p>
+              </div>
+            ) : (
+              <div className="absolute inset-0 bg-red-500/10 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                <XCircle className="w-16 h-16 text-red-500 mb-4" />
+                <p className="text-white font-medium mb-1">Access Denied</p>
+                <p className="text-red-400 text-sm break-all font-mono opacity-50">{lastScanned}</p>
               </div>
             )}
 
@@ -106,6 +150,7 @@ export default function ScannerPage() {
               variant="primary"
               onClick={() => {
                 setIsScanning(true);
+                setScanResult(null);
                 setLastScanned(null);
               }}
               className="mt-4"

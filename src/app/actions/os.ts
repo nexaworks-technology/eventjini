@@ -8,17 +8,48 @@ export async function getEventStats(eventId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   
-  // Try to get actual registrations count
+  // Get event details (price and page views)
+  const { data: event } = await supabase
+    .from('events')
+    .select('ticket_price_cents, page_views')
+    .eq('id', eventId)
+    .single();
+
+  // Get active registrations count
   const { count: registrationsCount } = await supabase
     .from('registrations')
     .select('*', { count: 'exact', head: true })
-    .eq('event_id', eventId);
+    .eq('event_id', eventId)
+    .neq('status', 'cancelled');
+    
+  // Get checkins count
+  const { count: checkInsCount } = await supabase
+    .from('registrations')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', eventId)
+    .eq('status', 'checked_in');
 
-  // Return real counts when available and mock the rest for the dashboard UI
+  const count = registrationsCount || 0;
+  const checkIns = checkInsCount || 0;
+  const price = (event?.ticket_price_cents || 0) / 100;
+
+  // Basic mock trend for now since we don't have daily timeseries in DB yet
+  const trend = [
+    { date: "Mon", registrations: Math.floor(count * 0.1) },
+    { date: "Tue", registrations: Math.floor(count * 0.15) },
+    { date: "Wed", registrations: Math.floor(count * 0.2) },
+    { date: "Thu", registrations: Math.floor(count * 0.3) },
+    { date: "Fri", registrations: Math.floor(count * 0.5) },
+    { date: "Sat", registrations: Math.floor(count * 0.8) },
+    { date: "Sun", registrations: count },
+  ];
+
   return {
-    registrationsCount: registrationsCount || 0,
-    revenue: 12500, // Mocked for now
-    pageViews: 1450, // Mocked for now
+    registrationsCount: count,
+    checkInsCount: checkIns,
+    revenue: count * price,
+    pageViews: event?.page_views || 0,
+    trend,
   };
 }
 
@@ -122,7 +153,7 @@ export async function getBudgets(eventId: string) {
   const supabase = createClient(cookieStore);
   
   const { data: budgets, error } = await supabase
-    .from('budgets')
+    .from('budget_items')
     .select('*')
     .eq('event_id', eventId)
     .order('created_at', { ascending: false });
@@ -133,4 +164,57 @@ export async function getBudgets(eventId: string) {
   }
 
   return budgets;
+}
+
+export async function checkInGuest(eventId: string, ticketCode: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  
+  // Find the registration by ticket_code
+  const { data: registration, error: fetchError } = await supabase
+    .from('registrations')
+    .select(`
+      id, 
+      status, 
+      event_id,
+      user:user_id (
+        full_name
+      )
+    `)
+    .eq('ticket_code', ticketCode)
+    .single();
+
+  if (fetchError || !registration) {
+    return { success: false, message: 'Invalid ticket code' };
+  }
+
+  // ENFORCE EVENT MATCHING
+  if (registration.event_id !== eventId) {
+    return { success: false, message: 'Invalid ticket for this specific event!' };
+  }
+
+  if (registration.status === 'checked_in') {
+    // @ts-ignore
+    return { success: false, message: `${registration.user?.full_name || 'Attendee'} is already checked in!` };
+  }
+
+  // Update status to checked_in
+  const { error: updateError } = await supabase
+    .from('registrations')
+    .update({ status: 'checked_in', checked_in_at: new Date().toISOString() })
+    .eq('id', registration.id);
+
+  if (updateError) {
+    return { success: false, message: 'Failed to update check-in status' };
+  }
+
+  // @ts-ignore
+  return { success: true, message: `${registration.user?.full_name || 'Attendee'} checked in successfully!` };
+}
+
+export async function incrementPageViews(eventId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  
+  await supabase.rpc('increment_page_views', { p_event_id: eventId });
 }

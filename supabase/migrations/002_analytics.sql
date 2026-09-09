@@ -1,0 +1,1 @@
+ALTER TABLE public.events ADD COLUMN page_views INTEGER DEFAULT 0;

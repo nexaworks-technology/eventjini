@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 
-export default function Loading() {
+export default function RootLoading() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/80 backdrop-blur-2xl">
-      <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-3xl">
+    <div className="w-full min-h-screen flex items-center justify-center bg-[#050505]">
+      <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] shadow-2xl backdrop-blur-3xl">
         <div className="relative flex items-center justify-center">
           <motion.div
             className="absolute inset-0 rounded-full border-t-2 border-cyan-500 blur-[2px]"

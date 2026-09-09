@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateGuestStatus } from "@/app/actions/event-management";
+import { updateGuestStatus } from "@/app/actions/os";
 import { Check, X } from "lucide-react";
 import { FadeInUp } from "@/components/animations/motion";
 
@@ -19,11 +19,33 @@ export default function GuestsClient({ initialGuests }: { initialGuests: Guest[]
   const handleStatusChange = async (id: string, newStatus: "Approved" | "Rejected" | "Pending") => {
     // Optimistic update
     setGuests((prev) => prev.map((g) => (g.id === id ? { ...g, status: newStatus } : g)));
-    await updateGuestStatus(id, newStatus);
+    await updateGuestStatus(id, newStatus.toLowerCase());
+  };
+
+  const exportCSV = () => {
+    const headers = ["Name,Email,TicketCode,Status"];
+    const csvContent = guests.map(g => `${g.name},${g.email},${g.ticketCode},${g.status}`);
+    const blob = new Blob([headers.concat(csvContent).join("\n")], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "guests_export.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <FadeInUp className="w-full">
+      <div className="flex justify-end mb-4">
+        <button 
+          onClick={exportCSV}
+          className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-4 py-2 rounded-xl text-sm font-medium hover:bg-cyan-500/20 transition-colors flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          Export CSV
+        </button>
+      </div>
       <div 
         className="rounded-2xl overflow-hidden"
         style={{

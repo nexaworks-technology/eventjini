@@ -46,10 +46,17 @@ export const updateSession = async (request: NextRequest) => {
     return NextResponse.redirect(url);
   }
 
-  // If user is logged in and tries to access auth routes, redirect to dashboard
+  // If user is logged in and tries to access auth routes, redirect to dashboard or redirect param
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    
+    if (redirectParam) {
+      url.pathname = redirectParam;
+      url.search = ''; // clear query params
+    } else {
+      url.pathname = '/my-tickets'; // Default landing for attendees now
+    }
     return NextResponse.redirect(url);
   }
 
@@ -57,14 +64,14 @@ export const updateSession = async (request: NextRequest) => {
   if (user && isDashboardRoute) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('is_organizer')
       .eq('id', user.id)
       .single();
 
-    // If delegate tries to access dashboard, redirect to home
-    if (profile?.role === 'delegate') {
+    // If non-organizer tries to access dashboard, redirect to onboarding
+    if (!profile?.is_organizer && request.nextUrl.pathname !== '/dashboard/onboarding') {
       const url = request.nextUrl.clone();
-      url.pathname = '/';
+      url.pathname = '/dashboard/onboarding';
       return NextResponse.redirect(url);
     }
   }

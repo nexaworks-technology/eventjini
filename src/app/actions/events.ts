@@ -28,6 +28,7 @@ export async function createEvent(formData: FormData) {
     
     const requires_approval = formData.get("requires_approval") === "true" || formData.get("requires_approval") === "on";
     const is_paid = formData.get("is_paid") === "true" || formData.get("is_paid") === "on";
+    const is_private = formData.get("is_private") === "true" || formData.get("is_private") === "on";
     const ticket_price_cents_str = formData.get("ticket_price_cents")?.toString();
 
     if (!title || !slug || !start_date || !end_date) {
@@ -52,6 +53,8 @@ export async function createEvent(formData: FormData) {
           requires_approval,
           is_paid,
           ticket_price_cents,
+          is_private,
+          status: 'published'
         },
       ])
       .select()
@@ -94,6 +97,36 @@ export async function getEvents() {
     }
 
     return { data };
+  } catch (err: any) {
+    return { error: err?.message || "An unexpected error occurred" };
+  }
+}
+
+export async function getPublicEvents() {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data, error } = await supabase
+      .from("events")
+      .select(`
+        *,
+        organizer:profiles!events_organizer_id_fkey(full_name, avatar_url)
+      `)
+      .eq("status", "published")
+      .eq("is_private", false)
+      .order("start_date", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching public events:", error);
+      return { error: error.message };
+    }
+
+    // Filter out past events
+    const now = new Date();
+    const upcomingEvents = data?.filter(e => new Date(e.end_date || e.start_date) > now) || [];
+
+    return { data: upcomingEvents };
   } catch (err: any) {
     return { error: err?.message || "An unexpected error occurred" };
   }
@@ -162,3 +195,49 @@ export async function registerForEvent(eventId: string) {
   }
 }
 
+
+export async function duplicateEvent(id: string) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { error: "Unauthorized" };
+
+    // Fetch original event
+    const { data: event, error: fetchError } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .eq("organizer_id", user.id)
+      .single();
+
+    if (fetchError || !event) return { error: "Event not found" };
+
+    // Create a new unique slug
+    const newSlug = event.slug + '-copy-' + Math.floor(Math.random() * 1000);
+    const newTitle = event.title + ' (Copy)';
+
+    // Remove fields that should not be duplicated
+    const { id: _id, created_at: _created, updated_at: _updated, slug: _slug, title: _title, status: _status, ...rest } = event;
+
+    const { data: newEvent, error: insertError } = await supabase
+      .from("events")
+      .insert([{
+        ...rest,
+        title: newTitle,
+        slug: newSlug,
+        status: 'draft',
+        organizer_id: user.id
+      }])
+      .select()
+      .single();
+
+    if (insertError) return { error: insertError.message };
+
+    revalidatePath("/dashboard/events");
+    return { data: newEvent };
+  } catch (err: any) {
+    return { error: err?.message || "An unexpected error occurred" };
+  }
+}
