@@ -73,15 +73,18 @@ export async function createSponsorRazorpayOrder(tierId: string) {
 
   const { data: tier, error: tierError } = await supabase
     .from("sponsorship_tiers")
-    .select("price, event_id")
+    .select("price_cents, event_id")
     .eq("id", tierId)
     .single();
 
-  if (tierError || !tier) return { error: "Sponsorship tier not found" };
+  if (tierError || !tier) {
+    console.error("Tier fetch error:", tierError, "Tier ID:", tierId);
+    return { error: "Sponsorship tier not found" };
+  }
 
   try {
     const order = await razorpay.orders.create({
-      amount: tier.price * 100, // assuming tier.price is in full rupees
+      amount: tier.price_cents, // price_cents is already in paise (base unit)
       currency: "INR",
       receipt: `sponsor_${tierId}_${crypto.randomBytes(4).toString("hex")}`,
     });
