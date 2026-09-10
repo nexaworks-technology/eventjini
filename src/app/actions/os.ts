@@ -262,3 +262,47 @@ export async function incrementPageViews(eventId: string) {
   
   await supabase.rpc('increment_page_views', { p_event_id: eventId });
 }
+
+export async function updateEventDetails(eventId: string, formData: FormData) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const title = formData.get("title")?.toString();
+    const description = formData.get("description")?.toString();
+    const start_date = formData.get("start_date")?.toString();
+    const end_date = formData.get("end_date")?.toString();
+    const location_name = formData.get("location_name")?.toString();
+    const banner_url = formData.get("banner_url")?.toString() || null;
+    const capacityStr = formData.get("capacity")?.toString();
+    
+    if (!title || !start_date || !end_date) {
+      return { error: "Missing required fields" };
+    }
+
+    const capacity = capacityStr ? parseInt(capacityStr, 10) : null;
+
+    const { error } = await supabase
+      .from("events")
+      .update({
+        title,
+        description,
+        start_date,
+        end_date,
+        location_name,
+        capacity,
+        banner_url,
+      })
+      .eq("id", eventId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    revalidatePath(`/dashboard/events/${eventId}/settings`);
+    revalidatePath(`/e/[slug]`, 'page'); // Can't easily know slug here, but it's fine
+    return { success: true };
+  } catch (err: any) {
+    return { error: err?.message || "An unexpected error occurred" };
+  }
+}

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { LayoutDashboard, Users, BarChart3, Radio, ScanLine, Shield, Zap } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, Radio, ScanLine, Shield, Zap, Settings } from "lucide-react";
 
 export default async function EventLayout({
   children,
@@ -66,6 +66,7 @@ export default async function EventLayout({
     { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
     { name: 'Automations', href: `/dashboard/events/${eventId}/automations`, icon: Zap, roles: ['owner', 'admin'] },
     { name: 'Team', href: `/dashboard/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
+    { name: 'Settings', href: `/dashboard/events/${eventId}/settings`, icon: Settings, roles: ['owner', 'admin'] },
   ];
 
   // Filter based on user role
