@@ -131,7 +131,7 @@ export async function verifySponsorPaymentAndRegister(
       tier_id: tierId,
       sponsor_user_id: user.id,
       company_name: companyName,
-      status: "approved"
+      status: "paid"
     });
 
   if (error) {
