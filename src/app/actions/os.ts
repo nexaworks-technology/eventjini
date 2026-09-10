@@ -68,7 +68,8 @@ export async function getGuests(eventId: string) {
         avatar_url
       )
     `)
-    .eq('event_id', eventId);
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching guests:', error);
@@ -78,20 +79,41 @@ export async function getGuests(eventId: string) {
   return guests;
 }
 
-export async function updateGuestStatus(registrationId: string, status: string) {
+export async function updateGuestStatus(registrationId: string, newStatus: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   
   const { error } = await supabase
     .from('registrations')
-    .update({ status })
+    .update({ approval_status: newStatus })
     .eq('id', registrationId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error('Error updating guest status:', error);
+    return { error: error.message };
   }
   
-  revalidatePath('/dashboard/events/[id]/guests', 'page');
+  revalidatePath('/dashboard/events/[id]/guests');
+  return { success: true };
+}
+
+export async function updateRegistrationSettings(eventId: string, requireB2b: boolean, requireApproval: boolean) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  
+  const { error } = await supabase
+    .from('events')
+    .update({ 
+      require_b2b_data: requireB2b,
+      requires_approval: requireApproval 
+    })
+    .eq('id', eventId);
+
+  if (error) {
+    return { error: error.message };
+  }
+  
+  revalidatePath('/dashboard/events/[id]/guests');
   return { success: true };
 }
 
