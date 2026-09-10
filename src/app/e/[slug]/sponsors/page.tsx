@@ -89,7 +89,7 @@ export default function SponsorsPage({
 
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-4xl font-bold text-white">
-                          ${tier.price.toLocaleString()}
+                          ₹{tier.price.toLocaleString()}
                         </span>
                       </div>
                       <p className="text-sm text-cyan-400 font-medium bg-cyan-500/10 inline-flex px-3 py-1 rounded-full border border-cyan-500/20">

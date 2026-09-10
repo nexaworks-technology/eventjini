@@ -26,7 +26,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }
 
   const kpis = [
-    { label: "Total Revenue", value: `$${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { label: "Total Revenue", value: `₹${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "text-cyan-500", bg: "bg-cyan-500/10" },
     { label: "Registrations", value: stats.registrationsCount, icon: Users, color: "text-purple-500", bg: "bg-purple-500/10" },
     { label: "Check-ins", value: stats.checkInsCount, icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { label: "Page Views", value: stats.pageViews.toLocaleString(), icon: Eye, color: "text-blue-500", bg: "bg-blue-500/10" },

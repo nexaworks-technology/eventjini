@@ -108,7 +108,7 @@ export default function SponsorsTiersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/70">Price ($)</label>
+                  <label className="text-sm text-white/70">Price (₹)</label>
                   <input
                     type="number"
                     required

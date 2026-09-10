@@ -26,7 +26,7 @@ export default function BudgetClient({ initialBudgets }: { initialBudgets: Budge
               </div>
               <div>
                 <p className="text-sm text-slate-400 mb-1">Total Estimated</p>
-                <p className="text-3xl font-bold text-white">${totalEstimated.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-white">₹{totalEstimated.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -40,7 +40,7 @@ export default function BudgetClient({ initialBudgets }: { initialBudgets: Budge
               </div>
               <div>
                 <p className="text-sm text-slate-400 mb-1">Total Actual</p>
-                <p className="text-3xl font-bold text-white">${totalActual.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-white">₹{totalActual.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function BudgetClient({ initialBudgets }: { initialBudgets: Budge
               <BarChart data={initialBudgets} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                 <XAxis dataKey="category" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
+                <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(value) => `₹${value}`} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', color: '#f8fafc' }}
@@ -91,10 +91,10 @@ export default function BudgetClient({ initialBudgets }: { initialBudgets: Budge
                   return (
                     <tr key={item.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
                       <td className="p-4 text-slate-200">{item.category}</td>
-                      <td className="p-4 text-slate-300 text-right">${item.estimated.toLocaleString()}</td>
-                      <td className="p-4 text-slate-300 text-right">${item.actual.toLocaleString()}</td>
+                      <td className="p-4 text-slate-300 text-right">₹{item.estimated.toLocaleString()}</td>
+                      <td className="p-4 text-slate-300 text-right">₹{item.actual.toLocaleString()}</td>
                       <td className={`p-4 text-right font-medium ${isOverBudget ? 'text-red-400' : 'text-emerald-400'}`}>
-                        {isOverBudget ? '-' : '+'}${Math.abs(variance).toLocaleString()}
+                        {isOverBudget ? '-' : '+'}₹{Math.abs(variance).toLocaleString()}
                       </td>
                     </tr>
                   );

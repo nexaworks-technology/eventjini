@@ -385,7 +385,7 @@ export default function CreateEventPage() {
                           animate={{ opacity: 1, height: "auto" }}
                           className="pl-4 border-l-2 border-cyan-500/50"
                         >
-                          <label htmlFor="ticket_price" className={labelClass}>Ticket Price ($)</label>
+                          <label htmlFor="ticket_price" className={labelClass}>Ticket Price (₹)</label>
                           <input
                             id="ticket_price"
                             name="ticket_price"
