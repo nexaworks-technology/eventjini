@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import EventRegistrationClient from "./registration-client";
-import { MapPin, Calendar, Clock, Info } from "lucide-react";
-import { FadeInUp, StaggerContainer, staggerChildVariants } from "@/components/animations/motion";
+import { MapPin, Calendar, Clock, Info, User } from "lucide-react";
+import { FadeInUp, StaggerContainer } from "@/components/animations/motion";
+import { Header } from "@/components/ui/header";
+import Image from "next/image";
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -34,93 +36,133 @@ export default async function EventPage({ params }: EventPageProps) {
   const priceFormatted = event.ticket_price_cents ? (event.ticket_price_cents / 100).toFixed(2) : "0";
 
   return (
-    <main className="min-h-screen bg-[#050505] text-slate-200 overflow-hidden relative selection:bg-cyan-500/30">
-      {/* Abstract Background Elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] opacity-20 pointer-events-none blur-[120px] bg-gradient-to-br from-cyan-500/40 via-purple-500/20 to-transparent mix-blend-screen rounded-full" />
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] opacity-10 pointer-events-none blur-[100px] bg-gradient-to-tl from-purple-500/40 via-cyan-500/20 to-transparent mix-blend-screen rounded-full" />
+    <main className="min-h-screen bg-canvas text-white overflow-x-hidden selection:bg-brand-primary/30">
+      <Header />
+      
+      {/* ── Massive Event Hero ── */}
+      <div className="relative w-full h-[50vh] md:h-[70vh] max-h-[800px] min-h-[400px]">
+        {event.banner_url ? (
+          <Image 
+            src={event.banner_url} 
+            alt={event.title} 
+            fill 
+            className="object-cover" 
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-surface to-canvas" />
+        )}
+        
+        {/* Gradients to blend image into canvas */}
+        <div className="absolute inset-0 bg-canvas/30 mix-blend-multiply" />
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-canvas via-canvas/80 to-transparent" />
+      </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-20 relative z-10">
+      <div className="max-w-6xl mx-auto px-6 -mt-32 md:-mt-48 relative z-10 pb-32">
         <StaggerContainer>
-          {/* Hero Section */}
-          <FadeInUp className="mb-12 text-center md:text-left">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-500 tracking-tight">
+          
+          {/* ── Title & Intro ── */}
+          <FadeInUp className="mb-12 text-left max-w-3xl">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tighter leading-tight drop-shadow-2xl">
               {event.title}
             </h1>
-            <p className="text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed">
-              {event.description}
-            </p>
+            <div className="flex flex-wrap items-center gap-6 text-base md:text-lg text-white/90 drop-shadow-md">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-brand-primary" />
+                <span>{new Date(event.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-brand-secondary" />
+                <span>{event.location_name || "Location TBA"}</span>
+              </div>
+            </div>
           </FadeInUp>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Event Details */}
-            <FadeInUp className="lg:col-span-2 space-y-6">
-              <div 
-                className="rounded-2xl p-8 space-y-8"
-                style={{
-                  background: "rgba(255,255,255,0.02)",
-                  backdropFilter: "blur(24px)",
-                  WebkitBackdropFilter: "blur(24px)",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
-                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-                  <Info className="w-5 h-5 text-cyan-400" />
-                  Event Information
+          {/* ── Grid Layout ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            {/* Left Column: Editorial Details */}
+            <FadeInUp className="lg:col-span-7 xl:col-span-8 space-y-12">
+              
+              {/* About Section */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-semibold text-muted uppercase tracking-widest flex items-center gap-2">
+                  <Info className="w-4 h-4 text-brand-primary" /> About
                 </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shrink-0">
-                      <Calendar className="w-5 h-5 text-cyan-400" />
-                    </div>
+                <p className="text-lg text-white/80 leading-relaxed whitespace-pre-wrap font-medium">
+                  {event.description}
+                </p>
+              </div>
+
+              {/* Time Section */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-semibold text-muted uppercase tracking-widest flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-brand-secondary" /> Schedule
+                </h3>
+                <div className="bg-surface border border-white/[0.04] rounded-2xl p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm text-slate-400 mb-1">Date</p>
-                      <p className="font-medium text-slate-200">
-                        {new Date(event.start_date).toLocaleDateString()}
+                      <p className="text-sm text-muted mb-1">Starts</p>
+                      <p className="text-lg font-medium text-white">
+                        {new Date(event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20 shrink-0">
-                      <Clock className="w-5 h-5 text-purple-400" />
-                    </div>
+                    <div className="hidden sm:block w-px h-10 bg-white/10" />
                     <div>
-                      <p className="text-sm text-slate-400 mb-1">Time</p>
-                      <p className="font-medium text-slate-200">
-                        {new Date(event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <p className="text-sm text-muted mb-1">Ends</p>
+                      <p className="text-lg font-medium text-white">
+                        {new Date(event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 sm:col-span-2">
-                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shrink-0">
-                      <MapPin className="w-5 h-5 text-cyan-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-400 mb-1">Location</p>
-                      <p className="font-medium text-slate-200">{event.location_name}</p>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Organizer Section */}
+              {event.organizer && (
+                <div className="space-y-6">
+                  <h3 className="text-xs font-semibold text-muted uppercase tracking-widest flex items-center gap-2">
+                    <User className="w-4 h-4 text-event-wellness" /> Hosted By
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    {event.organizer.avatar_url ? (
+                      <Image 
+                        src={event.organizer.avatar_url} 
+                        alt="Organizer" 
+                        width={48} 
+                        height={48} 
+                        className="rounded-full bg-surface border border-white/10" 
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center text-white font-bold shrink-0">
+                        {event.organizer.full_name?.[0] || "O"}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-base font-semibold text-white">{event.organizer.full_name}</p>
+                      <p className="text-sm text-muted">Event Organizer</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </FadeInUp>
 
-            {/* Registration Card */}
-            <FadeInUp delay={0.2} className="lg:col-span-1">
-              <EventRegistrationClient 
-                eventId={event.id}
-                isSoldOut={isSoldOut}
-                isFree={isFree}
-                price={parseFloat(priceFormatted)}
-                capacity={event.capacity || 100}
-                registeredCount={registeredCount}
-                isLoggedIn={!!user}
-              />
+            {/* Right Column: Sticky Registration Card */}
+            <FadeInUp delay={0.2} className="lg:col-span-5 xl:col-span-4 relative">
+              <div className="sticky top-28">
+                <EventRegistrationClient 
+                  eventId={event.id}
+                  isSoldOut={isSoldOut}
+                  isFree={isFree}
+                  price={parseFloat(priceFormatted)}
+                  capacity={event.capacity || 100}
+                  registeredCount={registeredCount}
+                  isLoggedIn={!!user}
+                />
+              </div>
             </FadeInUp>
           </div>
         </StaggerContainer>
-
       </div>
     </main>
   );
