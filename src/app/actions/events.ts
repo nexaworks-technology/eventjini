@@ -25,6 +25,7 @@ export async function createEvent(formData: FormData) {
     const end_date = formData.get("end_date")?.toString();
     const location_name = formData.get("location_name")?.toString();
     const capacityStr = formData.get("capacity")?.toString();
+    const banner_url = formData.get("banner_url")?.toString() || null;
     
     const requires_approval = formData.get("requires_approval") === "true" || formData.get("requires_approval") === "on";
     const is_paid = formData.get("is_paid") === "true" || formData.get("is_paid") === "on";
@@ -54,6 +55,7 @@ export async function createEvent(formData: FormData) {
           is_paid,
           ticket_price_cents,
           is_private,
+          banner_url,
           status: 'published'
         },
       ])

@@ -8,7 +8,8 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { FadeInUp, StaggerContainer, staggerChildVariants } from "@/components/animations/motion";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRightIcon, ArrowLeftIcon, CheckIcon, CalendarIcon, MapPinIcon, InfoIcon, SettingsIcon } from "lucide-react";
+import { ArrowRightIcon, ArrowLeftIcon, CheckIcon, CalendarIcon, MapPinIcon, InfoIcon, SettingsIcon, ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function CreateEventPage() {
     title: "",
     slug: "",
     description: "",
+    banner_url: "",
     start_date: "",
     end_date: "",
     timezone: "UTC",
@@ -86,8 +88,8 @@ export default function CreateEventPage() {
     }
   };
 
-  const inputClass = "w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all";
-  const labelClass = "block text-sm font-medium text-slate-300 mb-2";
+  const inputClass = "w-full bg-canvas border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-muted/40 focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all";
+  const labelClass = "block text-xs font-semibold text-muted uppercase tracking-widest mb-2 pl-1";
 
   return (
     <div className="max-w-3xl mx-auto py-8">
@@ -178,6 +180,57 @@ export default function CreateEventPage() {
                             className={`${inputClass} rounded-l-none`}
                           />
                         </div>
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Event Cover Image</label>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[
+                              { label: "Tech", url: "/demo/tech.jpg" },
+                              { label: "Music", url: "/demo/music.jpg" },
+                              { label: "Wellness", url: "/demo/wellness.jpg" },
+                              { label: "Custom", url: "custom" },
+                            ].map((preset) => (
+                              <button
+                                key={preset.url}
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, banner_url: preset.url === "custom" ? "" : preset.url }))}
+                                className={`relative h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                                  (preset.url === "custom" && !["/demo/tech.jpg", "/demo/music.jpg", "/demo/wellness.jpg"].includes(formData.banner_url) && formData.banner_url !== undefined) || formData.banner_url === preset.url
+                                    ? "border-brand-primary ring-2 ring-brand-primary/20"
+                                    : "border-transparent opacity-50 hover:opacity-100"
+                                }`}
+                              >
+                                {preset.url !== "custom" ? (
+                                  <>
+                                    <Image src={preset.url} alt={preset.label} fill className="object-cover" />
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                      <span className="text-xs font-semibold text-white tracking-widest uppercase">{preset.label}</span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="absolute inset-0 bg-white/5 flex items-center justify-center flex-col gap-1">
+                                    <ImageIcon className="w-5 h-5 text-muted" />
+                                    <span className="text-[10px] font-medium text-muted tracking-widest uppercase">Custom</span>
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          {(!["/demo/tech.jpg", "/demo/music.jpg", "/demo/wellness.jpg"].includes(formData.banner_url)) && (
+                            <input
+                              id="banner_url"
+                              name="banner_url"
+                              value={formData.banner_url}
+                              onChange={updateForm}
+                              placeholder="https://example.com/your-image.jpg"
+                              className={inputClass}
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted mt-2">Choose a demo cover or provide a URL to a custom image.</p>
                       </div>
 
                       <div>
