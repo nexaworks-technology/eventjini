@@ -104,7 +104,7 @@ export function Header() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-16 z-40 bg-surface border-b border-white/[0.06] p-4 md:hidden shadow-2xl"
+            className="fixed inset-x-0 top-16 z-40 bg-[#07090D]/95 backdrop-blur-2xl border-b border-white/[0.06] p-4 md:hidden shadow-2xl"
           >
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (

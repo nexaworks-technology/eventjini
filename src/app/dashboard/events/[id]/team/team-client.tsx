@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
 import { addTeamMember, removeTeamMember } from "@/app/actions/team";
@@ -121,7 +122,9 @@ export default function TeamClient({ eventId, teamMembers: initialMembers }: { e
                 initialMembers.map((member) => (
                   <div key={member.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors">
                     <div className="col-span-6 md:col-span-5 flex items-center gap-3">
-                      <img 
+                      <Image 
+                        width={32}
+                        height={32}
                         src={member.profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${member.profile?.full_name || 'U'}&backgroundColor=131b2f&textColor=6366f1`} 
                         alt="Avatar" 
                         className="w-8 h-8 rounded-full border border-white/10"

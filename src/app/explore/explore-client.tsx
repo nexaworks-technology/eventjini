@@ -75,7 +75,7 @@ export default function ExploreClient({ initialEvents, error }: { initialEvents:
           </div>
           
           {/* Category Pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:flex-wrap">
             {CATEGORIES.map((cat) => (
               <motion.button
                 key={cat.id}

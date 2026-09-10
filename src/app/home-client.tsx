@@ -122,10 +122,13 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
 
             {/* Global Community Trust Badge */}
             <FadeInUp delay={0.5} className="flex items-center gap-4 pt-8 border-t border-white/[0.06] max-w-lg">
-              <div className="flex -space-x-3">
-                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
-                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
-                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+              <div className="flex -space-x-3 mt-4 justify-center md:justify-start">
+                <Image width={40} height={40} className="rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                <Image width={40} height={40} className="rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                <Image width={40} height={40} className="rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                <div className="w-10 h-10 rounded-full border-2 border-[#07090D] bg-brand-primary/20 flex items-center justify-center text-xs font-bold text-brand-primary">
+                  12k+
+                </div>
               </div>
               <div>
                 <p className="text-sm font-semibold text-white">A global community</p>
