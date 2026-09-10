@@ -101,31 +101,45 @@ export function Header() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-16 z-40 bg-[#07090D]/95 backdrop-blur-2xl border-b border-white/[0.06] p-4 md:hidden shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-[#07090D]/98 backdrop-blur-3xl md:hidden flex flex-col pt-20 px-6 pb-6"
           >
-            <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
+            <div className="flex flex-col gap-4 flex-1 mt-8">
+              {navLinks.map((link, i) => (
+                <motion.div
                   key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`p-4 rounded-xl text-sm font-semibold transition-colors ${
-                    pathname === link.href ? "bg-white/[0.06] text-white" : "text-muted hover:text-white hover:bg-white/[0.04]"
-                  }`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
                 >
-                  {link.label}
-                </Link>
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block py-3 text-2xl font-bold tracking-tight transition-colors ${
+                      pathname === link.href ? "text-brand-primary" : "text-white/80 hover:text-white"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
               ))}
-              <div className="h-px bg-white/[0.04] my-2" />
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-auto"
+            >
+              <div className="h-px bg-white/[0.08] mb-6" />
               <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="primary" className="w-full py-4 text-sm font-bold">
+                <Button variant="primary" className="w-full py-6 text-lg font-bold rounded-2xl shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)]">
                   Sign In
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
