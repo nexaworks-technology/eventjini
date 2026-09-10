@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
-import { Calendar, DollarSign, Users, TrendingUp, Plus } from "lucide-react";
+import { Calendar, DollarSign, Users, TrendingUp, Plus, ArrowRight } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | EventJini",
@@ -15,11 +15,19 @@ export default async function DashboardRootPage() {
   
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Aggregate stats across all events for this workspace (owner)
+  // Fetch workspace name
+  const { data: workspace } = await supabase
+    .from("organizers")
+    .select("name")
+    .eq("owner_id", user?.id)
+    .single();
+
+  // Aggregate stats
   const { data: events } = await supabase
     .from("events")
-    .select("id, ticket_price_cents")
-    .eq("organizer_id", user?.id);
+    .select("id, title, slug, start_date, ticket_price_cents, capacity")
+    .eq("organizer_id", user?.id)
+    .order("start_date", { ascending: true });
 
   let totalRevenue = 0;
   let totalAttendees = 0;
@@ -34,72 +42,98 @@ export default async function DashboardRootPage() {
       .neq("status", "cancelled");
 
     totalAttendees = count || 0;
-    
-    // Simplistic revenue calculation for MVP (assuming all events are same price or we calculate average, actually we can just sum but it's hard without group by in JS. For MVP let's mock the sum if multiple prices, or just use 0 if free)
-    // A better approach is to query registrations with event price joined.
   }
 
-  // Get real revenue
+  // Real revenue
   const { data: regs } = await supabase
     .from("registrations")
     .select(`event:events(ticket_price_cents)`)
     .eq("status", "approved")
     .neq("event:events.ticket_price_cents", null);
   
-  // calculate total revenue
   if (regs) {
-      totalRevenue = regs.reduce((sum, r: any) => sum + ((r.event?.ticket_price_cents || 0) / 100), 0);
+    totalRevenue = regs.reduce((sum, r: any) => sum + ((r.event?.ticket_price_cents || 0) / 100), 0);
   }
 
+  const upcomingEvents = events?.filter(e => new Date(e.start_date) > new Date()).slice(0, 3) || [];
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-8">
+    <div className="space-y-10">
+      {/* ── Greeting ── */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Command Center</h1>
-          <p className="text-white/60 mt-1">Overview of your workspace performance.</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">
+            {greeting()}, {workspace?.name || "Organizer"} 👋
+          </h1>
+          <p className="text-muted">Here's what's happening across your workspace.</p>
         </div>
         <Link href="/dashboard/events/new">
           <Button variant="primary">
             <Plus className="w-4 h-4 mr-2" />
-            Host Event
+            New Event
           </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <GlassCard className="p-6 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-white/60">Total Revenue</span>
-            <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400"><DollarSign className="w-5 h-5"/></div>
-          </div>
-          <h2 className="text-3xl font-bold text-white">${totalRevenue.toLocaleString()}</h2>
-        </GlassCard>
-        
-        <GlassCard className="p-6 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-white/60">Total Attendees</span>
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><Users className="w-5 h-5"/></div>
-          </div>
-          <h2 className="text-3xl font-bold text-white">{totalAttendees.toLocaleString()}</h2>
-        </GlassCard>
-
-        <GlassCard className="p-6 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-white/60">Events Hosted</span>
-            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400"><Calendar className="w-5 h-5"/></div>
-          </div>
-          <h2 className="text-3xl font-bold text-white">{events?.length || 0}</h2>
-        </GlassCard>
-        
-        <GlassCard className="p-6 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-white/60">Growth</span>
-            <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400"><TrendingUp className="w-5 h-5"/></div>
-          </div>
-          <h2 className="text-3xl font-bold text-white">+14%</h2>
-        </GlassCard>
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-brand-primary", bg: "bg-brand-primary/10" },
+          { label: "Attendees", value: totalAttendees.toLocaleString(), icon: Users, color: "text-brand-secondary", bg: "bg-brand-secondary/10" },
+          { label: "Events", value: (events?.length || 0).toString(), icon: Calendar, color: "text-brand-accent", bg: "bg-brand-accent/10" },
+          { label: "Growth", value: "+14%", icon: TrendingUp, color: "text-event-wellness", bg: "bg-event-wellness/10" },
+        ].map((stat) => (
+          <GlassCard key={stat.label} level={2} animate={false} className="p-5">
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-xs font-semibold text-muted uppercase tracking-widest">{stat.label}</span>
+              <div className={`p-2 rounded-xl ${stat.bg}`}>
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">{stat.value}</h2>
+          </GlassCard>
+        ))}
       </div>
+
+      {/* ── Upcoming Events ── */}
+      {upcomingEvents.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-white tracking-tight">Upcoming Events</h2>
+            <Link href="/dashboard/events" className="text-brand-primary hover:text-brand-accent text-sm font-medium flex items-center gap-1 transition-colors">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {upcomingEvents.map((event: any) => (
+              <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block group">
+                <GlassCard level={2} animate={false} hoverGlow className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
+                      <Calendar className="w-5 h-5 text-brand-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-white group-hover:text-brand-accent transition-colors">{event.title}</h3>
+                      <p className="text-sm text-muted">
+                        {new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {event.capacity > 0 && ` · ${event.capacity} capacity`}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted group-hover:text-brand-primary transition-colors" />
+                </GlassCard>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
