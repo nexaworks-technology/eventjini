@@ -83,7 +83,32 @@ export default function MyTicketsClient({ initialTickets, error }: { initialTick
         </h1>
       </FadeInUp>
 
-      {error && (
+      {error === "Unauthorized" && (
+        <FadeInUp delay={0.1} className="py-20 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 rounded-[2rem] bg-[#131B2F] border border-white/10 flex items-center justify-center mb-8 shadow-2xl relative">
+            <div className="absolute inset-0 rounded-[2rem] bg-brand-primary/20 blur-xl" />
+            <TicketIcon className="w-10 h-10 text-brand-primary relative z-10" />
+          </div>
+          <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Your next experience awaits</h3>
+          <p className="text-white/60 max-w-md mx-auto mb-10 text-lg">
+            Sign in to access your event wallet, view your tickets, and manage your registrations.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Link href="/login">
+              <button className="px-8 py-3.5 rounded-full bg-brand-primary text-white font-semibold hover:bg-brand-accent transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                Sign In
+              </button>
+            </Link>
+            <Link href="/explore">
+              <button className="px-8 py-3.5 rounded-full bg-surface border border-white/10 text-white font-semibold hover:bg-white/5 transition-all">
+                Explore Events
+              </button>
+            </Link>
+          </div>
+        </FadeInUp>
+      )}
+
+      {error && error !== "Unauthorized" && (
         <div className="text-red-400 p-4 rounded-2xl bg-red-400/5 border border-red-400/10 mb-8">
           Failed to load tickets: {error}
         </div>
@@ -161,18 +186,18 @@ export default function MyTicketsClient({ initialTickets, error }: { initialTick
 
       {/* ── Empty State ── */}
       {initialTickets.length === 0 && !error && (
-        <FadeInUp className="py-24 flex flex-col items-center justify-center text-center">
-          <div className="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center mb-6 border border-white/[0.06]">
-            <TicketIcon className="w-8 h-8 text-muted/30" />
+        <FadeInUp className="py-20 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 rounded-[2rem] bg-surface border border-white/10 flex items-center justify-center mb-8 shadow-xl">
+            <TicketIcon className="w-10 h-10 text-muted/30" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">No tickets yet</h3>
-          <p className="text-muted max-w-sm mb-8">
+          <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">No tickets yet</h3>
+          <p className="text-white/60 max-w-sm mx-auto mb-10 text-lg">
             You haven't registered for any events yet. Find something incredible.
           </p>
           <Link href="/explore">
-            <Button variant="primary">
+            <button className="px-8 py-3.5 rounded-full bg-brand-primary text-white font-semibold hover:bg-brand-accent transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]">
               Explore Events
-            </Button>
+            </button>
           </Link>
         </FadeInUp>
       )}
