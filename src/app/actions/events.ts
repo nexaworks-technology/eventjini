@@ -28,6 +28,7 @@ export async function createEvent(formData: FormData) {
     const banner_url = formData.get("banner_url")?.toString() || null;
     
     const requires_approval = formData.get("requires_approval") === "true" || formData.get("requires_approval") === "on";
+    const require_b2b_data = formData.get("require_b2b_data") === "true" || formData.get("require_b2b_data") === "on";
     const is_paid = formData.get("is_paid") === "true" || formData.get("is_paid") === "on";
     const is_private = formData.get("is_private") === "true" || formData.get("is_private") === "on";
     const ticket_price_cents_str = formData.get("ticket_price_cents")?.toString();
@@ -51,11 +52,12 @@ export async function createEvent(formData: FormData) {
           end_date,
           location_name,
           capacity,
-          requires_approval,
-          is_paid,
-          ticket_price_cents,
-          is_private,
           banner_url,
+          requires_approval,
+          require_b2b_data,
+          is_paid,
+          is_private,
+          ticket_price_cents,
           status: 'published'
         },
       ])

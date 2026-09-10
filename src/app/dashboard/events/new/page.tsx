@@ -30,6 +30,7 @@ export default function CreateEventPage() {
     is_paid: false,
     ticket_price: "",
     requires_approval: false,
+    require_b2b_data: false,
   });
 
   const updateForm = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -414,6 +415,23 @@ export default function CreateEventPage() {
                             onChange={(e) => setFormData(prev => ({ ...prev, requires_approval: e.target.checked }))}
                           />
                           <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                      </div>
+
+                      <div className="p-4 rounded-xl border border-white/10 bg-white/5 flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Require B2B Data</h3>
+                          <p className="text-sm text-slate-400">Ask for Company, Job Title, etc.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            name="require_b2b_data" 
+                            className="sr-only peer"
+                            checked={formData.require_b2b_data}
+                            onChange={(e) => setFormData(prev => ({ ...prev, require_b2b_data: e.target.checked }))}
+                          />
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                         </label>
                       </div>
                     </div>
