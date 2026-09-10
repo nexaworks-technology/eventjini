@@ -10,7 +10,7 @@ export default async function MyTicketsPage() {
   const { data: tickets, error } = await getMyTickets();
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
+    <main className="min-h-screen bg-canvas text-white">
       <Header />
       <MyTicketsClient initialTickets={tickets || []} error={error} />
     </main>

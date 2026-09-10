@@ -2,8 +2,7 @@ import { getTicketByCode } from "@/app/actions/registrations";
 import { notFound } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { FadeInUp } from "@/components/animations/motion";
-import { Calendar, MapPin, CheckCircle2, Ticket as TicketIcon } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
+import { Calendar, MapPin, CheckCircle2, User } from "lucide-react";
 import { AddToCalendar } from "@/components/ui/add-to-calendar";
 
 interface TicketPageProps {
@@ -26,101 +25,98 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-slate-200 overflow-hidden relative flex flex-col items-center justify-center py-20 px-4">
-      {/* Background Neon Elements */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-20 pointer-events-none blur-[150px] bg-gradient-to-tr from-cyan-500/50 via-purple-500/30 to-transparent mix-blend-screen rounded-full" />
+    <main className="min-h-screen bg-canvas text-slate-200 flex flex-col items-center justify-center py-12 px-4">
       
       <FadeInUp className="w-full max-w-md relative z-10">
+        {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-2">
-            Your Digital Ticket
+          <p className="text-xs font-semibold text-brand-primary uppercase tracking-widest mb-2">Digital Pass</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            {ticket.event?.title || "Event Ticket"}
           </h1>
-          <p className="text-slate-400">Present this QR code at the entrance</p>
         </div>
 
         {/* Ticket Container */}
-        <div className="relative group">
-          {/* Subtle Glow Behind Ticket */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+        <div className="rounded-3xl overflow-hidden border border-white/[0.06] bg-surface shadow-2xl">
           
-          <GlassCard 
-            hoverGlow 
-            className="relative p-0 overflow-hidden rounded-[2rem]"
-          >
-            {/* Top Section: QR Code */}
-            <div className="relative p-8 flex flex-col items-center justify-center bg-black/40 border-b border-dashed border-white/10">
-              {/* Cutouts for ticket effect */}
-              <div className="absolute -bottom-4 -left-4 w-8 h-8 rounded-full bg-[#050505] shadow-inner" />
-              <div className="absolute -bottom-4 -right-4 w-8 h-8 rounded-full bg-[#050505] shadow-inner" />
-
-              <div className="relative p-4 rounded-2xl bg-white mb-2 shadow-[0_0_40px_-10px_rgba(6,182,212,0.5)]">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 blur-xl -z-10" />
-                <QRCodeSVG
-                  value={ticket.ticket_code}
-                  size={200}
-                  level="H"
-                  includeMargin={false}
-                  className="rounded-lg"
-                  fgColor="#000000"
-                  bgColor="#ffffff"
-                />
-              </div>
-              <p className="font-mono text-sm tracking-widest text-slate-400 mt-4 uppercase">
-                {ticket.ticket_code}
-              </p>
+          {/* ── Top: Event Details (Dark) ── */}
+          <div className="p-8 space-y-6">
+            {/* Status Badge */}
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400 capitalize">{ticket.status}</span>
             </div>
 
-            {/* Bottom Section: Details */}
-            <div className="p-8 bg-gradient-to-b from-transparent to-white/[0.02]">
-              <div className="space-y-6">
+            {/* Details Grid */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <User className="w-4 h-4 text-brand-secondary mt-1 shrink-0" />
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-1 leading-tight">
-                    {ticket.event?.title || "Event"}
-                  </h2>
-                  <div className="flex items-center gap-2 text-cyan-400">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-sm font-medium capitalize">{ticket.status} Registration</span>
-                  </div>
+                  <p className="text-[11px] text-muted/50 uppercase tracking-widest mb-0.5">Attendee</p>
+                  <p className="text-sm font-medium text-white">{ticket.user?.full_name || ticket.user?.email || "Attendee"}</p>
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <TicketIcon className="w-5 h-5 text-purple-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Attendee</p>
-                      <p className="font-medium text-slate-200">{ticket.user?.full_name || ticket.user?.email || "Attendee"}</p>
-                    </div>
-                  </div>
+              <div className="flex items-start gap-3">
+                <Calendar className="w-4 h-4 text-brand-primary mt-1 shrink-0" />
+                <div>
+                  <p className="text-[11px] text-muted/50 uppercase tracking-widest mb-0.5">Date & Time</p>
+                  <p className="text-sm font-medium text-white">
+                    {ticket.event?.start_date 
+                      ? new Date(ticket.event.start_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) 
+                      : "TBA"}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {ticket.event?.start_date 
+                      ? new Date(ticket.event.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) 
+                      : ""}
+                  </p>
+                </div>
+              </div>
 
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-cyan-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Date & Time</p>
-                      <p className="font-medium text-slate-200">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : "TBA"}</p>
-                      <p className="text-sm text-slate-400">{ticket.event?.start_date ? new Date(ticket.event.start_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ""}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 mb-4">
-                    <MapPin className="w-5 h-5 text-purple-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Location</p>
-                      <p className="font-medium text-slate-200">{ticket.event?.location_name || "TBA"}</p>
-                    </div>
-                  </div>
-                  
-                  {ticket.event && (
-                    <div className="pt-4 border-t border-white/5">
-                      <AddToCalendar event={ticket.event} />
-                    </div>
-                  )}
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-brand-secondary mt-1 shrink-0" />
+                <div>
+                  <p className="text-[11px] text-muted/50 uppercase tracking-widest mb-0.5">Location</p>
+                  <p className="text-sm font-medium text-white">{ticket.event?.location_name || "TBA"}</p>
                 </div>
               </div>
             </div>
-          </GlassCard>
+          </div>
+
+          {/* ── Dashed Divider with Cutouts ── */}
+          <div className="relative">
+            <div className="border-t border-dashed border-white/[0.08]" />
+            <div className="absolute -top-4 -left-4 w-8 h-8 rounded-full bg-canvas" />
+            <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-canvas" />
+          </div>
+
+          {/* ── Bottom: QR Code (White — Maximum Scannability) ── */}
+          <div className="bg-white p-8 flex flex-col items-center">
+            <QRCodeSVG
+              value={ticket.ticket_code}
+              size={220}
+              level="H"
+              includeMargin={false}
+              fgColor="#000000"
+              bgColor="#ffffff"
+            />
+            <p className="font-mono text-sm tracking-[0.25em] text-gray-500 mt-5 uppercase">
+              {ticket.ticket_code}
+            </p>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Scan this at the entrance
+            </p>
+          </div>
         </div>
+
+        {/* Calendar Button — Below the Ticket */}
+        {ticket.event && (
+          <FadeInUp delay={0.2} className="mt-6">
+            <AddToCalendar event={ticket.event} />
+          </FadeInUp>
+        )}
       </FadeInUp>
     </main>
   );
 }
-

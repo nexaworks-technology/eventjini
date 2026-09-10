@@ -10,7 +10,7 @@ export default async function ProfilePage() {
   const { data: profile, error } = await getProfile();
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
+    <main className="min-h-screen bg-canvas text-white">
       <Header />
       <ProfileClient initialProfile={profile || {}} error={error} />
     </main>
