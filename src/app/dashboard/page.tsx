@@ -15,6 +15,23 @@ export default async function DashboardRootPage() {
   
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Temporary auto-migration for banners
+  if (user) {
+    const { data: missingEvents } = await supabase.from("events").select("id, title").eq("organizer_id", user.id).is("banner_url", null);
+    if (missingEvents && missingEvents.length > 0) {
+      for (const evt of missingEvents) {
+        let banner_url = "/demo/tech.jpg";
+        const titleLower = evt.title.toLowerCase();
+        if (titleLower.includes("music") || titleLower.includes("festival") || titleLower.includes("neon")) {
+          banner_url = "/demo/music.jpg";
+        } else if (titleLower.includes("wellness") || titleLower.includes("yoga")) {
+          banner_url = "/demo/wellness.jpg";
+        }
+        await supabase.from("events").update({ banner_url }).eq("id", evt.id);
+      }
+    }
+  }
+
   // Fetch workspace name
   const { data: workspace } = await supabase
     .from("organizers")
