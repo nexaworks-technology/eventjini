@@ -96,6 +96,52 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           </div>
         </GlassCard>
       </FadeInUp>
+
+      {/* UTM Attribution Table */}
+      <FadeInUp delay={0.4}>
+        <GlassCard className="mt-6 p-6 overflow-hidden">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-white">Marketing Attribution (UTM)</h3>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/5">
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider">Source</th>
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider">Medium</th>
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider">Campaign</th>
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Clicks</th>
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Conversions</th>
+                  <th className="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Conv. Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.trackingLinks?.length > 0 ? (
+                  stats.trackingLinks.map((link: any) => (
+                    <tr key={link.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-sm font-medium text-white">{link.source}</td>
+                      <td className="p-4 text-sm text-slate-300">{link.medium}</td>
+                      <td className="p-4 text-sm text-slate-300">{link.campaign}</td>
+                      <td className="p-4 text-sm text-slate-300 text-right">{link.clicks}</td>
+                      <td className="p-4 text-sm font-bold text-emerald-400 text-right">{link.conversions}</td>
+                      <td className="p-4 text-sm text-brand-secondary text-right">
+                        {link.clicks > 0 ? Math.round((link.conversions / link.clicks) * 100) : 0}%
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-slate-500 text-sm">
+                      No tracking link data available. Add ?utm_source=... to your event URL to start tracking.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </FadeInUp>
     </div>
   );
 }

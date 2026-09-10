@@ -25,6 +25,7 @@ interface EventRegistrationClientProps {
   registeredCount: number;
   isLoggedIn: boolean;
   requireB2bData: boolean;
+  trackingLinkId: string | null;
 }
 
 export default function EventRegistrationClient({
@@ -36,6 +37,7 @@ export default function EventRegistrationClient({
   registeredCount,
   isLoggedIn,
   requireB2bData,
+  trackingLinkId,
 }: EventRegistrationClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -75,14 +77,22 @@ export default function EventRegistrationClient({
 
     setError(null);
     startTransition(async () => {
-      const guestData = !isLoggedIn ? {
+      let guestData: any = !isLoggedIn ? {
         email: guestEmail,
         name: guestName,
         company: guestCompany,
         jobTitle: guestJobTitle,
         isStudent: isStudent,
         college: guestCollege
-      } : undefined;
+      } : {};
+      
+      if (trackingLinkId) {
+        guestData.trackingLinkId = trackingLinkId;
+      }
+      
+      if (isLoggedIn && !trackingLinkId) {
+        guestData = undefined; // For backward compatibility if neither exist
+      }
 
       if (isFree) {
         const res = await registerForEvent(eventId, guestData);

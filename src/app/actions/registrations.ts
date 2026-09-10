@@ -8,12 +8,13 @@ import { revalidatePath } from "next/cache";
 export async function registerForEvent(
   eventId: string, 
   guestData?: {
-    email: string;
-    name: string;
-    company: string;
-    jobTitle: string;
-    isStudent: boolean;
-    college: string;
+    email?: string;
+    name?: string;
+    company?: string;
+    jobTitle?: string;
+    isStudent?: boolean;
+    college?: string;
+    trackingLinkId?: string;
   }
 ) {
   try {
@@ -63,6 +64,10 @@ export async function registerForEvent(
 
     if (user) {
       payload.user_id = user.id;
+    }
+    
+    if (guestData?.trackingLinkId) {
+      payload.tracking_link_id = guestData.trackingLinkId;
     }
     
     if (guestData) {

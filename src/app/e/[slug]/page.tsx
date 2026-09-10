@@ -1,4 +1,4 @@
-import { getEventBySlug } from "@/app/actions/events";
+import { getEventBySlug, trackUtmClick } from "@/app/actions/events";
 import { incrementPageViews } from "@/app/actions/os";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
@@ -11,15 +11,30 @@ import Image from "next/image";
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function EventPage({ params }: EventPageProps) {
+export default async function EventPage({ params, searchParams }: EventPageProps) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const slug = resolvedParams.slug;
   const { data: event, error } = await getEventBySlug(slug);
 
   if (error || !event) {
     notFound();
+  }
+
+  // Handle UTM Tracking
+  const utmSource = resolvedSearchParams.utm_source as string | undefined;
+  const utmMedium = resolvedSearchParams.utm_medium as string | undefined;
+  const utmCampaign = resolvedSearchParams.utm_campaign as string | undefined;
+  let trackingLinkId = null;
+
+  if (utmSource) {
+    const trackingRes = await trackUtmClick(event.id, utmSource, utmMedium, utmCampaign);
+    if (trackingRes.data) {
+      trackingLinkId = trackingRes.data.id;
+    }
   }
 
   // Increment real page views for analytics
@@ -159,6 +174,7 @@ export default async function EventPage({ params }: EventPageProps) {
                   registeredCount={registeredCount}
                   isLoggedIn={!!user}
                   requireB2bData={event.require_b2b_data || false}
+                  trackingLinkId={trackingLinkId}
                 />
               </div>
             </FadeInUp>

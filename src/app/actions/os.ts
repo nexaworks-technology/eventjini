@@ -44,12 +44,34 @@ export async function getEventStats(eventId: string) {
     { date: "Sun", registrations: count },
   ];
 
+  const { data: trackingLinks } = await supabase
+    .from('tracking_links')
+    .select(`
+      id,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      clicks,
+      registrations:registrations(count)
+    `)
+    .eq('event_id', eventId);
+
+  const formattedTracking = (trackingLinks || []).map((link: any) => ({
+    id: link.id,
+    source: link.utm_source,
+    medium: link.utm_medium || "-",
+    campaign: link.utm_campaign || "-",
+    clicks: link.clicks,
+    conversions: link.registrations?.[0]?.count || 0,
+  }));
+
   return {
     registrationsCount: count,
     checkInsCount: checkIns,
     revenue: count * price,
     pageViews: event?.page_views || 0,
     trend,
+    trackingLinks: formattedTracking,
   };
 }
 

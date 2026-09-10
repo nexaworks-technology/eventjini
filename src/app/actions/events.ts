@@ -243,3 +243,47 @@ export async function duplicateEvent(id: string) {
     return { error: err?.message || "An unexpected error occurred" };
   }
 }
+
+export async function trackUtmClick(eventId: string, source: string, medium?: string, campaign?: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // First, check if link exists
+  let { data: trackingLink, error: fetchError } = await supabase
+    .from("tracking_links")
+    .select("id, clicks")
+    .eq("event_id", eventId)
+    .eq("utm_source", source)
+    .eq("utm_medium", medium || null)
+    .eq("utm_campaign", campaign || null)
+    .single();
+
+  if (!trackingLink) {
+    // Create new tracking link
+    const { data: newLink, error: insertError } = await supabase
+      .from("tracking_links")
+      .insert({
+        event_id: eventId,
+        utm_source: source,
+        utm_medium: medium || null,
+        utm_campaign: campaign || null,
+        clicks: 1
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !newLink) return { error: "Failed to create tracking link" };
+    return { data: newLink };
+  } else {
+    // Increment existing
+    const { data: updatedLink, error: updateError } = await supabase
+      .from("tracking_links")
+      .update({ clicks: (trackingLink.clicks || 0) + 1 })
+      .eq("id", trackingLink.id)
+      .select("id")
+      .single();
+
+    if (updateError || !updatedLink) return { error: "Failed to update tracking link" };
+    return { data: updatedLink };
+  }
+}
