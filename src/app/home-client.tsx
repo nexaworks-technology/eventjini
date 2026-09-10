@@ -75,7 +75,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
             </FadeInUp>
             
             <FadeInUp delay={0.1}>
-              <h1 className="text-6xl sm:text-7xl lg:text-[6rem] xl:text-[7.5rem] font-bold tracking-tighter leading-[0.95] text-white mb-6">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] xl:text-[7.5rem] font-bold tracking-tighter leading-[0.95] text-white mb-6">
                 Events <br/>
                 <span className="text-white/60">that move</span> <br/>
                 <span className="text-brand-primary drop-shadow-[0_0_25px_rgba(99,102,241,0.3)]">people.</span>
