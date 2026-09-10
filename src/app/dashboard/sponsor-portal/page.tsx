@@ -27,7 +27,7 @@ export default async function SponsorPortalList() {
         event:event_id (
           id,
           title,
-          start_time,
+          start_date,
           banner_url
         )
       )
@@ -44,14 +44,9 @@ export default async function SponsorPortalList() {
         <GlassCard level={2} className="p-12 max-w-lg text-center">
           <Building2 className="w-16 h-16 text-muted/50 mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-white mb-3">No Sponsorships Found</h2>
-          <p className="text-muted mb-4">
+          <p className="text-muted mb-8">
             You are not currently registered as a sponsor for any events. Browse our upcoming events to become a sponsor.
           </p>
-          {sponsorError && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6 text-sm text-left font-mono">
-              Raw DB Error: {JSON.stringify(sponsorError)}
-            </div>
-          )}
           <Link href="/explore">
             <button className="bg-brand-primary text-white font-bold py-3 px-6 rounded-xl hover:bg-brand-accent transition-colors">
               Explore Events
@@ -102,7 +97,7 @@ export default async function SponsorPortalList() {
                     {(sponsorship.tier as any)?.event?.title}
                   </h3>
                   <p className="text-sm text-muted mb-6 flex-1">
-                    {new Date((sponsorship.tier as any)?.event?.start_time).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {new Date((sponsorship.tier as any)?.event?.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
                   
                   <div className="flex items-center justify-between mt-auto">
