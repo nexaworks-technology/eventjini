@@ -27,9 +27,6 @@ export function CityCard({ name, count, image }: CityCardProps) {
         <h4 className="text-white font-semibold text-sm md:text-base tracking-wide drop-shadow-md group-hover:-translate-y-0.5 transition-transform duration-300">
           {name}
         </h4>
-        <p className="text-[10px] md:text-xs text-white/60 font-medium">
-          {count}+ events
-        </p>
       </div>
     </Link>
   );

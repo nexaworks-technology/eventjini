@@ -117,22 +117,6 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
                 More <ChevronRight className="w-3 h-3" />
               </Link>
             </FadeInUp>
-
-            {/* Stats Row */}
-            <FadeInUp delay={0.5} className="flex items-center gap-8 md:gap-12 pt-8 border-t border-white/[0.06]">
-              <div>
-                <p className="text-2xl md:text-3xl font-bold text-white mb-1">10K+</p>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">Events Hosted</p>
-              </div>
-              <div>
-                <p className="text-2xl md:text-3xl font-bold text-white mb-1">1M+</p>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">People Connected</p>
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-2xl md:text-3xl font-bold text-white mb-1">50K+</p>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">Organizers</p>
-              </div>
-            </FadeInUp>
           </div>
         </div>
       </section>
@@ -190,7 +174,6 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
             <Link href="/explore?q=online" className="group relative h-28 w-44 md:h-32 md:w-48 rounded-2xl overflow-hidden flex-shrink-0 snap-center border border-white/[0.04] bg-[#131B2F] hover:bg-[#1A233A] transition-colors flex flex-col items-center justify-center">
               <Globe className="w-8 h-8 text-brand-primary mb-2 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
               <h4 className="text-white font-semibold text-sm">Online</h4>
-              <p className="text-[10px] text-white/50 font-medium mt-0.5">200+ events</p>
             </Link>
           </div>
         </FadeInUp>
