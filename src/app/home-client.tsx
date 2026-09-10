@@ -42,20 +42,22 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* HERO SECTION                                               */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative w-full min-h-[100vh] pt-24 pb-16 flex items-center">
-        {/* Massive Background Image Bleed on Right */}
+      <section ref={heroRef} className="relative w-full min-h-[100vh] flex items-center pt-20 pb-16">
+        {/* Full-width Parallax Background */}
         <motion.div 
           style={{ y: heroY, opacity: heroOpacity }}
-          className="absolute top-0 right-0 w-full lg:w-[70%] h-[60vh] lg:h-[100vh] z-0 overflow-hidden"
+          className="absolute inset-0 w-full h-[120vh] z-0 -top-[10vh]"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-[#07090D] via-[#07090D]/80 to-transparent lg:via-[#07090D]/50 z-10" />
+          {/* Gradients for text legibility and blending */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#07090D] via-[#07090D]/80 to-transparent w-[80%] z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#07090D] via-transparent to-[#07090D]/40 z-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#07090D] via-transparent to-transparent z-10" />
+          
           <Image 
-            src="/demo/music.jpg" 
-            alt="Event Atmosphere" 
+            src="/demo/hero-bg.jpg" 
+            alt="EventJini Futuristic Hero" 
             fill 
-            className="object-cover object-right-top mix-blend-screen opacity-70"
+            className="object-cover object-center mix-blend-screen opacity-90"
             priority
           />
         </motion.div>
@@ -63,7 +65,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
         <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* LEFT: Typography & Search */}
-          <div className="lg:col-span-7 xl:col-span-6 pt-20 lg:pt-0">
+          <div className="lg:col-span-8 xl:col-span-7">
             <FadeInUp>
               <h3 className="text-[10px] md:text-xs font-semibold tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-4">
                 People <span className="w-1 h-1 rounded-full bg-white/20" /> 
@@ -73,7 +75,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
             </FadeInUp>
             
             <FadeInUp delay={0.1}>
-              <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] xl:text-[6.5rem] font-bold tracking-tighter leading-[0.95] text-white mb-6">
+              <h1 className="text-6xl sm:text-7xl lg:text-[6rem] xl:text-[7.5rem] font-bold tracking-tighter leading-[0.95] text-white mb-6">
                 Events <br/>
                 <span className="text-white/60">that move</span> <br/>
                 <span className="text-brand-primary drop-shadow-[0_0_25px_rgba(99,102,241,0.3)]">people.</span>
@@ -87,7 +89,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
             </FadeInUp>
 
             {/* Command-style Search */}
-            <FadeInUp delay={0.3} className="w-full max-w-xl mb-6">
+            <FadeInUp delay={0.3} className="w-full max-w-2xl mb-6">
               <form onSubmit={handleSearch} className="relative group">
                 <div className="absolute inset-0 bg-white/[0.03] rounded-full blur-xl group-focus-within:bg-brand-primary/10 transition-colors duration-500" />
                 <div className="relative flex items-center bg-[#131B2F]/60 backdrop-blur-xl border border-white/10 rounded-full p-2 group-focus-within:border-brand-primary/40 group-focus-within:bg-[#131B2F]/80 transition-all shadow-2xl">
@@ -97,7 +99,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
                     placeholder="Search events, topics, or cities..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-none py-3 px-2 text-base text-white placeholder-white/40 focus:outline-none focus:ring-0"
+                    className="flex-1 bg-transparent border-none py-3 px-2 text-base md:text-lg text-white placeholder-white/40 focus:outline-none focus:ring-0"
                   />
                   <button type="submit" className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center text-white hover:scale-105 hover:bg-brand-accent transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]">
                     <ArrowRight className="w-5 h-5" />
@@ -109,13 +111,26 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
             {/* Category Pills */}
             <FadeInUp delay={0.4} className="flex flex-wrap gap-2 mb-12">
               {CATEGORIES.map(cat => (
-                <Link key={cat} href={`/explore?q=${cat.toLowerCase()}`} className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
+                <Link key={cat} href={`/explore?q=${cat.toLowerCase()}`} className="px-5 py-2.5 rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm">
                   {cat}
                 </Link>
               ))}
-              <Link href="/explore" className="px-4 py-2 rounded-full border border-transparent bg-white/[0.02] text-xs font-medium text-white/50 hover:text-white transition-all flex items-center gap-1">
+              <Link href="/explore" className="px-5 py-2.5 rounded-full border border-transparent bg-white/[0.02] text-xs font-medium text-white/50 hover:text-white transition-all flex items-center gap-1 backdrop-blur-sm">
                 More <ChevronRight className="w-3 h-3" />
               </Link>
+            </FadeInUp>
+
+            {/* Global Community Trust Badge */}
+            <FadeInUp delay={0.5} className="flex items-center gap-4 pt-8 border-t border-white/[0.06] max-w-lg">
+              <div className="flex -space-x-3">
+                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+                <img className="w-10 h-10 rounded-full border-2 border-[#07090D] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Avatar" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">A global community</p>
+                <p className="text-xs text-white/50">Builders. Creators. Attendees. You.</p>
+              </div>
             </FadeInUp>
           </div>
         </div>
