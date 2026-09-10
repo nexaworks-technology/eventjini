@@ -54,7 +54,7 @@ export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }
           <div className="absolute inset-0 bg-gradient-to-b from-[#07090D] via-transparent to-transparent z-10" />
           
           <Image 
-            src="/demo/hero-bg.jpg" 
+            src="/demo/hero-bg-v2.jpg" 
             alt="EventJini Futuristic Hero" 
             fill 
             className="object-cover object-center mix-blend-screen opacity-90"
