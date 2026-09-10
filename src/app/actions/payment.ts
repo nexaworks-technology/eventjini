@@ -139,5 +139,8 @@ export async function verifySponsorPaymentAndRegister(
     return { error: "Payment successful, but failed to create sponsor profile. Contact support." };
   }
 
+  const { revalidatePath } = require("next/cache");
+  revalidatePath("/dashboard/sponsor-portal");
+
   return { success: true };
 }
