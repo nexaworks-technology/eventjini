@@ -38,7 +38,7 @@ export default async function SponsorDashboardLayout({
     .single();
 
   if (!sponsorship) {
-    redirect('/dashboard/sponsor-portal');
+    redirect('/dashboard/sponsor/portal');
   }
 
   return (
@@ -46,7 +46,7 @@ export default async function SponsorDashboardLayout({
       <div className="border-b border-white/5 bg-surface/50 backdrop-blur-xl sticky top-0 z-20">
         <div className="px-6 py-4 flex items-center justify-between">
           <div>
-            <Link href="/dashboard/sponsor-portal" className="text-muted hover:text-white flex items-center gap-2 text-sm font-medium mb-1 transition-colors">
+            <Link href="/dashboard/sponsor/portal" className="text-muted hover:text-white flex items-center gap-2 text-sm font-medium mb-1 transition-colors">
               <ArrowLeft className="w-4 h-4" /> Back to Portals
             </Link>
             <h1 className="text-xl font-bold text-white flex items-center gap-3">

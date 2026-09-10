@@ -67,7 +67,7 @@ export default async function SponsorPortalList() {
       <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sponsorships.map((sponsorship: any) => (
           <FadeInUp key={sponsorship.id} className="h-full">
-            <Link href={`/dashboard/sponsor-portal/${sponsorship.id}`}>
+            <Link href={`/dashboard/sponsor/portal/${sponsorship.id}`}>
               <GlassCard level={2} className="h-full flex flex-col overflow-hidden hover:border-brand-primary/40 group transition-all duration-300">
                 <div className="h-32 w-full relative bg-surface border-b border-white/5">
                   {(sponsorship.tier as any)?.event?.banner_url ? (

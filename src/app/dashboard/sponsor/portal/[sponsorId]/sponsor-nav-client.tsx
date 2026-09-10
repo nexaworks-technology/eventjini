@@ -9,9 +9,9 @@ export function SponsorNavClient({ sponsorId }: { sponsorId: string }) {
   const pathname = usePathname();
   
   const tabs = [
-    { name: 'Overview', href: `/dashboard/sponsor-portal/${sponsorId}`, icon: Settings },
-    { name: 'Lead Scanner', href: `/dashboard/sponsor-portal/${sponsorId}/scanner`, icon: QrCode },
-    { name: 'Lead CRM', href: `/dashboard/sponsor-portal/${sponsorId}/leads`, icon: Users },
+    { name: 'Overview', href: `/dashboard/sponsor/portal/${sponsorId}`, icon: Settings },
+    { name: 'Lead Scanner', href: `/dashboard/sponsor/portal/${sponsorId}/scanner`, icon: QrCode },
+    { name: 'Lead CRM', href: `/dashboard/sponsor/portal/${sponsorId}/leads`, icon: Users },
   ];
 
   return (

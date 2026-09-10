@@ -33,7 +33,7 @@ export default async function SponsorOverviewPage({
       .update({ company_name: name, company_logo_url: logo })
       .eq('id', sponsorId);
       
-    revalidatePath(`/dashboard/sponsor-portal/${sponsorId}`);
+    revalidatePath(`/dashboard/sponsor/portal/${sponsorId}`);
   }
 
   return (

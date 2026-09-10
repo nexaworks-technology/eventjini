@@ -69,7 +69,7 @@ export async function createEvent(formData: FormData) {
       return { error: error.message };
     }
 
-    revalidatePath("/dashboard/events");
+    revalidatePath("/dashboard/organizer/events");
     return { data };
   } catch (err: any) {
     console.error("Error in createEvent:", err);
@@ -239,7 +239,7 @@ export async function duplicateEvent(id: string) {
 
     if (insertError) return { error: insertError.message };
 
-    revalidatePath("/dashboard/events");
+    revalidatePath("/dashboard/organizer/events");
     return { data: newEvent };
   } catch (err: any) {
     return { error: err?.message || "An unexpected error occurred" };

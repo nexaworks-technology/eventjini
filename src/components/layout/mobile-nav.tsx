@@ -2,20 +2,38 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, Compass, Settings, Building2 } from "lucide-react";
+import { LayoutDashboard, Calendar, Compass, Settings, Building2, Ticket, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-const links = [
-  { name: "Dash", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { name: "Events", href: "/dashboard/events", icon: Calendar },
-  { name: "Sponsors", href: "/dashboard/sponsor-portal", icon: Building2 },
-  { name: "Explore", href: "/explore", icon: Compass },
-  { name: "Profile", href: "/dashboard/profile", icon: Settings },
-];
+const WORKSPACES = {
+  attendee: [
+    { name: "Tickets", href: "/dashboard/attendee", icon: Ticket, exact: true },
+    { name: "Explore", href: "/explore", icon: Compass },
+    { name: "Settings", href: "/dashboard/attendee/profile", icon: Settings },
+  ],
+  organizer: [
+    { name: "Command", href: "/dashboard/organizer", icon: LayoutDashboard, exact: true },
+    { name: "Events", href: "/dashboard/organizer/events", icon: Calendar },
+    { name: "Switch", href: "/dashboard/attendee", icon: Ticket }, // Allow switching back
+  ],
+  sponsor: [
+    { name: "Portal", href: "/dashboard/sponsor/portal", icon: LayoutDashboard, exact: true },
+    { name: "Switch", href: "/dashboard/attendee", icon: Ticket }, // Allow switching back
+  ]
+};
+
+type WorkspaceKey = keyof typeof WORKSPACES;
 
 export function MobileNav() {
   const pathname = usePathname();
+
+  // Determine active workspace from URL
+  let activeWorkspace: WorkspaceKey = "attendee";
+  if (pathname.startsWith("/dashboard/organizer")) activeWorkspace = "organizer";
+  if (pathname.startsWith("/dashboard/sponsor")) activeWorkspace = "sponsor";
+
+  const links = WORKSPACES[activeWorkspace];
 
   return (
     <div className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl border-t border-white/[0.04] pb-safe">
@@ -23,7 +41,7 @@ export function MobileNav() {
         {links.map((link) => {
           const isActive = link.exact 
             ? pathname === link.href 
-            : pathname.startsWith(link.href);
+            : pathname.startsWith(link.href) && link.name !== "Switch";
           const Icon = link.icon;
 
           return (

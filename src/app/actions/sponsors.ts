@@ -201,7 +201,7 @@ export async function captureSponsorLead(sponsorId: string, ticketCode: string) 
     return { success: false, message: "Failed to capture lead" };
   }
 
-  revalidatePath(`/dashboard/sponsor-portal/${sponsorId}/leads`);
+  revalidatePath(`/dashboard/sponsor/portal/${sponsorId}/leads`);
 
   const name = (registration.user as any)?.full_name || registration.guest_name || "Unknown";
   const company = registration.guest_is_student ? registration.guest_college : registration.guest_company || "-";

@@ -79,7 +79,7 @@ export default function SponsorsPage({
           toast.error(verifyRes.error);
         } else {
           toast.success("Sponsorship secured! Redirecting to your portal...");
-          router.push("/dashboard/sponsor-portal");
+          router.push("/dashboard/sponsor/portal");
         }
         setProcessingTier(null);
         setSelectedTier(null);

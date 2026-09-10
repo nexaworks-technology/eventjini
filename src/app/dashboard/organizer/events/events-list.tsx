@@ -26,7 +26,7 @@ export function EventsList({ events }: { events: any[] }) {
       toast.error(result.error);
     } else if (result.data) {
       toast.success("Event duplicated successfully!");
-      router.push(`/dashboard/events/${result.data.id}`);
+      router.push(`/dashboard/organizer/events/${result.data.id}`);
     }
   };
 
@@ -41,7 +41,7 @@ export function EventsList({ events }: { events: any[] }) {
           Host amazing experiences with beautiful registration pages, 
           analytics, and seamless attendee management.
         </p>
-        <Link href="/dashboard/events/new">
+        <Link href="/dashboard/organizer/events/new">
           <Button variant="primary" size="lg">
             <PlusIcon className="w-5 h-5 mr-1" />
             Create Event
@@ -89,7 +89,7 @@ export function EventsList({ events }: { events: any[] }) {
                 </div>
               </div>
               
-              <Link href={`/dashboard/events/${event.id}`}>
+              <Link href={`/dashboard/organizer/events/${event.id}`}>
                 <Button variant="secondary" className="w-full">
                   Manage Event
                 </Button>

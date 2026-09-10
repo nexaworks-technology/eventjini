@@ -144,7 +144,7 @@ export async function verifySponsorPaymentAndRegister(
   }
 
   const { revalidatePath } = require("next/cache");
-  revalidatePath("/dashboard/sponsor-portal");
+  revalidatePath("/dashboard/sponsor/portal");
 
   return { success: true };
 }

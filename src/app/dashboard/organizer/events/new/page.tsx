@@ -80,7 +80,7 @@ export default function CreateEventPage() {
         toast.error(result.error);
       } else {
         toast.success("Event created successfully!");
-        router.push("/dashboard/events");
+        router.push("/dashboard/organizer/events");
       }
     } catch (err) {
       toast.error("An error occurred while creating the event.");
