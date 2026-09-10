@@ -153,3 +153,63 @@ export async function getSponsorAnalytics(eventId: string): Promise<SponsorAnaly
     companySizes,
   };
 }
+
+import { revalidatePath } from "next/cache";
+
+export async function captureSponsorLead(sponsorId: string, ticketCode: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // 1. Verify user is logged in
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: "Unauthorized" };
+
+  // 2. Find the registration by ticket code
+  const { data: registration, error: regError } = await supabase
+    .from('registrations')
+    .select(`
+      id,
+      guest_name,
+      guest_company,
+      guest_job_title,
+      guest_college,
+      guest_is_student,
+      user:user_id (
+        full_name
+      )
+    `)
+    .eq('ticket_code', ticketCode)
+    .single();
+
+  if (regError || !registration) {
+    return { success: false, message: "Invalid ticket code" };
+  }
+
+  // 3. Insert into sponsor_leads
+  const { error: insertError } = await supabase
+    .from('sponsor_leads')
+    .insert({
+      sponsor_id: sponsorId,
+      registration_id: registration.id
+    });
+
+  if (insertError) {
+    if (insertError.code === '23505') { // Unique violation
+      return { success: false, message: "Lead already captured" };
+    }
+    console.error("Lead capture error:", insertError);
+    return { success: false, message: "Failed to capture lead" };
+  }
+
+  revalidatePath(`/dashboard/sponsor-portal/${sponsorId}/leads`);
+
+  const name = (registration.user as any)?.full_name || registration.guest_name || "Unknown";
+  const company = registration.guest_is_student ? registration.guest_college : registration.guest_company || "-";
+  const jobTitle = registration.guest_is_student ? "Student" : registration.guest_job_title || "-";
+
+  return { 
+    success: true, 
+    message: "Lead captured successfully!",
+    lead: { name, company, jobTitle, id: registration.id }
+  };
+}
