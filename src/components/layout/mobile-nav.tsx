@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, Compass, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, Compass, Settings, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const links = [
   { name: "Dash", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
+  { name: "Sponsors", href: "/dashboard/sponsor-portal", icon: Building2 },
   { name: "Explore", href: "/explore", icon: Compass },
   { name: "Profile", href: "/dashboard/profile", icon: Settings },
 ];

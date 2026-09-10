@@ -81,7 +81,7 @@ export default async function SponsorPortalList() {
                       {(sponsorship.tier as any)?.name} Sponsor
                     </span>
                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${
-                      sponsorship.status === 'approved' ? 'bg-cyan-500/80 text-white' : 'bg-amber-500/80 text-white'
+                      sponsorship.status === 'paid' ? 'bg-cyan-500/80 text-white' : 'bg-amber-500/80 text-white'
                     }`}>
                       {sponsorship.status}
                     </span>

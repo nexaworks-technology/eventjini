@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, BarChart3, Users, Settings, Compass } from "lucide-react";
+import { LayoutDashboard, Calendar, BarChart3, Users, Settings, Compass, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import Image from "next/image";
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
+  { name: "Sponsorships", href: "/dashboard/sponsor-portal", icon: Building2 },
   { name: "Explore", href: "/explore", icon: Compass },
   { name: "Settings", href: "/dashboard/profile", icon: Settings },
 ];
