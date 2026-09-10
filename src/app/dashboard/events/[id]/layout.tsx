@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { LayoutDashboard, Users, BarChart3, Radio, ScanLine } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, Radio, ScanLine, Shield } from "lucide-react";
 
 export default async function EventLayout({
   children,
@@ -44,6 +44,7 @@ export default async function EventLayout({
     { name: 'Analytics', href: `/dashboard/events/${eventId}/analytics`, icon: BarChart3 },
     { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine },
     { name: 'Broadcast', href: `/dashboard/events/${eventId}/broadcast`, icon: Radio },
+    { name: 'Team', href: `/dashboard/events/${eventId}/team`, icon: Shield },
   ];
 
   return (
