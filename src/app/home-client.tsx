@@ -2,253 +2,275 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { FadeInUp, GlowPulse } from "@/components/animations/motion";
 import { Header } from "@/components/ui/header";
 import { EventCard } from "@/components/ui/event-card";
-import { Calendar, MapPin, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
-import { Search } from "lucide-react";
-import { useState } from "react";
+import { CityCard } from "@/components/ui/city-card";
+import { ArrowRight, Search, ChevronRight, Sparkles, MoveRight, Globe } from "lucide-react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-/* ---- Ambient background ---- */
-function AmbientGlow({ color, size, x, y, delay = 0 }: { color: string; size: number; x: string; y: string; delay?: number }) {
-  return (
-    <motion.div
-      className="pointer-events-none absolute rounded-full"
-      style={{
-        width: size,
-        height: size,
-        background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-        filter: "blur(120px)",
-        opacity: 0.15,
-        top: y,
-        left: x,
-      }}
-      animate={{
-        x: [0, 40, -30, 15, 0],
-        y: [0, -30, 20, -15, 0],
-        opacity: [0.15, 0.22, 0.15],
-      }}
-      transition={{
-        duration: 20,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay,
-      }}
-    />
-  );
-}
+const CATEGORIES = ["Tech", "Business", "Music", "Design", "Wellness", "Community"];
+const CITIES = [
+  { name: "Mumbai", count: 120, image: "https://images.unsplash.com/photo-1522206090757-558661674482?q=80&w=800&auto=format&fit=crop" },
+  { name: "Delhi", count: 80, image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=800&auto=format&fit=crop" },
+  { name: "Bengaluru", count: 70, image: "https://images.unsplash.com/photo-1596443686812-2f45229eebc3?q=80&w=800&auto=format&fit=crop" },
+  { name: "Hyderabad", count: 45, image: "https://images.unsplash.com/photo-1573887163889-4876b509f6b9?q=80&w=800&auto=format&fit=crop" }
+];
 
 export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const heroRef = useRef(null);
+  
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 1000], [0, 200]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      router.push("/explore");
     }
   };
 
-  // Pick the first event as the "featured" immersive card
-  const featuredEvent = featuredEvents?.[0];
-  const remainingEvents = featuredEvents?.slice(1, 4) || [];
-
   return (
-    <div className="relative flex flex-col items-center overflow-hidden bg-canvas min-h-screen">
+    <div className="relative min-h-screen bg-[#07090D] text-white selection:bg-brand-primary/30 overflow-x-hidden font-sans">
       <Header />
-      
-      {/* Ambient atmospheric gradients */}
-      <AmbientGlow color="#6366f1" size={600} x="-5%" y="5%" />
-      <AmbientGlow color="#8b5cf6" size={500} x="65%" y="15%" delay={3} />
-      <AmbientGlow color="#06b6d4" size={400} x="30%" y="60%" delay={6} />
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* HERO SECTION                                               */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 pt-32 pb-16 md:pt-44 md:pb-24">
-        
-        {/* Navigation Pillars */}
-        <FadeInUp className="flex items-center justify-center gap-8 mb-12">
-          <Link href="/explore" className="text-sm font-medium text-muted hover:text-white transition-colors">
-            Discover
-          </Link>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
-          <Link href="/dashboard" className="text-sm font-medium text-muted hover:text-white transition-colors">
-            Create
-          </Link>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
-          <Link href="/my-tickets" className="text-sm font-medium text-muted hover:text-white transition-colors">
-            Connect
-          </Link>
-        </FadeInUp>
+      <section ref={heroRef} className="relative w-full min-h-[100vh] pt-24 pb-16 flex items-center">
+        {/* Massive Background Image Bleed on Right */}
+        <motion.div 
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="absolute top-0 right-0 w-full lg:w-[70%] h-[60vh] lg:h-[100vh] z-0 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-[#07090D] via-[#07090D]/80 to-transparent lg:via-[#07090D]/50 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07090D] via-transparent to-[#07090D]/40 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#07090D] via-transparent to-transparent z-10" />
+          <Image 
+            src="/demo/music.jpg" 
+            alt="Event Atmosphere" 
+            fill 
+            className="object-cover object-right-top mix-blend-screen opacity-70"
+            priority
+          />
+        </motion.div>
 
-        {/* Editorial Typography */}
-        <FadeInUp delay={0.15} className="text-center mb-10">
-          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-[0.9] text-white">
-            EVENTS
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent">
-              THAT MOVE
-            </span>
-            <br />
-            PEOPLE.
-          </h1>
-        </FadeInUp>
+        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* LEFT: Typography & Search */}
+          <div className="lg:col-span-7 xl:col-span-6 pt-20 lg:pt-0">
+            <FadeInUp>
+              <h3 className="text-[10px] md:text-xs font-semibold tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-4">
+                People <span className="w-1 h-1 rounded-full bg-white/20" /> 
+                Ideas <span className="w-1 h-1 rounded-full bg-white/20" /> 
+                Experiences
+              </h3>
+            </FadeInUp>
+            
+            <FadeInUp delay={0.1}>
+              <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] xl:text-[6.5rem] font-bold tracking-tighter leading-[0.95] text-white mb-6">
+                Events <br/>
+                <span className="text-white/60">that move</span> <br/>
+                <span className="text-brand-primary drop-shadow-[0_0_25px_rgba(99,102,241,0.3)]">people.</span>
+              </h1>
+            </FadeInUp>
+            
+            <FadeInUp delay={0.2}>
+              <p className="text-lg md:text-xl text-white/70 mb-10 font-medium tracking-wide">
+                Discover. Attend. Host. Make it happen.
+              </p>
+            </FadeInUp>
 
-        {/* Search Bar */}
-        <FadeInUp delay={0.3} className="max-w-2xl mx-auto mb-6">
-          <form onSubmit={handleSearch} className="relative group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted group-focus-within:text-brand-primary transition-colors" />
-            <input 
-              type="text"
-              placeholder="Search events, people, places..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-surface border border-white/[0.06] rounded-2xl pl-14 pr-6 py-4 text-base text-white placeholder-muted/60 focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all"
-            />
-          </form>
-        </FadeInUp>
+            {/* Command-style Search */}
+            <FadeInUp delay={0.3} className="w-full max-w-xl mb-6">
+              <form onSubmit={handleSearch} className="relative group">
+                <div className="absolute inset-0 bg-white/[0.03] rounded-full blur-xl group-focus-within:bg-brand-primary/10 transition-colors duration-500" />
+                <div className="relative flex items-center bg-[#131B2F]/60 backdrop-blur-xl border border-white/10 rounded-full p-2 group-focus-within:border-brand-primary/40 group-focus-within:bg-[#131B2F]/80 transition-all shadow-2xl">
+                  <Search className="w-5 h-5 text-white/40 ml-4 mr-2" />
+                  <input 
+                    type="text"
+                    placeholder="Search events, topics, or cities..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-none py-3 px-2 text-base text-white placeholder-white/40 focus:outline-none focus:ring-0"
+                  />
+                  <button type="submit" className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center text-white hover:scale-105 hover:bg-brand-accent transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </form>
+            </FadeInUp>
 
-        {/* Sub-tagline */}
-        <FadeInUp delay={0.4}>
-          <p className="text-center text-muted text-base md:text-lg max-w-lg mx-auto leading-relaxed">
-            The operating system for discovering, creating, and experiencing events.
-          </p>
-        </FadeInUp>
+            {/* Category Pills */}
+            <FadeInUp delay={0.4} className="flex flex-wrap gap-2 mb-12">
+              {CATEGORIES.map(cat => (
+                <Link key={cat} href={`/explore?q=${cat.toLowerCase()}`} className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
+                  {cat}
+                </Link>
+              ))}
+              <Link href="/explore" className="px-4 py-2 rounded-full border border-transparent bg-white/[0.02] text-xs font-medium text-white/50 hover:text-white transition-all flex items-center gap-1">
+                More <ChevronRight className="w-3 h-3" />
+              </Link>
+            </FadeInUp>
+
+            {/* Stats Row */}
+            <FadeInUp delay={0.5} className="flex items-center gap-8 md:gap-12 pt-8 border-t border-white/[0.06]">
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-white mb-1">10K+</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">Events Hosted</p>
+              </div>
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-white mb-1">1M+</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">People Connected</p>
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-2xl md:text-3xl font-bold text-white mb-1">50K+</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-semibold">Organizers</p>
+              </div>
+            </FadeInUp>
+          </div>
+        </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* TRENDING NOW                                               */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {featuredEvents && featuredEvents.length > 0 && (
-        <section className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-20">
-          <FadeInUp delay={0.5}>
-            <div className="flex items-center justify-between mb-10">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
-                <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                  TRENDING NOW
-                </h2>
-              </div>
-              <Link href="/explore" className="text-brand-primary hover:text-brand-accent text-sm font-medium flex items-center gap-1.5 transition-colors group">
-                View All <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+        <section className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 py-20 border-t border-white/[0.04]">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+            <FadeInUp>
+              <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-2">Trending Now</h2>
+              <p className="text-sm text-white/50 font-medium">Curated events everyone's talking about.</p>
+            </FadeInUp>
+            <FadeInUp delay={0.1}>
+              <Link href="/explore" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-all">
+                View all <MoveRight className="w-3 h-3" />
               </Link>
+            </FadeInUp>
+          </div>
+          
+          <FadeInUp delay={0.2} className="w-full">
+            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-6 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-3 xl:grid-cols-4">
+              {featuredEvents.slice(0, 4).map((event: any) => (
+                <EventCard key={event.id} event={event} href={`/e/${event.slug}`} />
+              ))}
             </div>
           </FadeInUp>
-          
-          {/* Featured Event — Immersive Large Card */}
-          {featuredEvent && (
-            <FadeInUp delay={0.6} className="mb-8">
-              <Link href={`/e/${featuredEvent.slug}`} className="group block">
-                <div className="relative h-[320px] md:h-[400px] rounded-3xl overflow-hidden bg-surface border border-white/[0.06]">
-                  {featuredEvent.banner_url ? (
-                    <Image 
-                      src={featuredEvent.banner_url} 
-                      alt={featuredEvent.title} 
-                      fill 
-                      className="object-cover opacity-60 group-hover:opacity-75 group-hover:scale-[1.03] transition-all duration-700" 
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-surface to-canvas" />
-                  )}
-                  
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/60 to-transparent" />
-                  
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Sparkles className="w-4 h-4 text-brand-primary" />
-                      <span className="text-xs font-semibold text-brand-primary uppercase tracking-widest">Featured</span>
-                    </div>
-                    <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight group-hover:text-brand-accent transition-colors">
-                      {featuredEvent.title}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-muted">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-brand-primary" />
-                        <span>{new Date(featuredEvent.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-brand-secondary" />
-                        <span>{featuredEvent.location_name || "TBA"}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Price Badge */}
-                  <div className="absolute top-6 right-6 bg-canvas/70 backdrop-blur-xl border border-glass-border px-4 py-2 rounded-full">
-                    <span className="text-sm font-bold text-white">
-                      {featuredEvent.ticket_price_cents > 0 
-                        ? `₹${(featuredEvent.ticket_price_cents / 100).toFixed(0)}`
-                        : "FREE"}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </FadeInUp>
-          )}
-          
-          {/* Remaining Events — Standard Cards */}
-          {remainingEvents.length > 0 && (
-            <FadeInUp delay={0.7}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {remainingEvents.map((event: any) => (
-                  <EventCard key={event.id} event={event} href={`/e/${event.slug}`} />
-                ))}
-              </div>
-            </FadeInUp>
-          )}
         </section>
       )}
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* FOOTER / CTA                                               */}
+      {/* HAPPENING AROUND YOU                                       */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 w-full border-t border-white/[0.04] py-24">
-        <FadeInUp className="text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-6">
-            MORE THAN EVENTS.
-          </h2>
-          <p className="text-muted text-lg max-w-md mx-auto mb-10">
-            Build. Host. Grow. Your events. Your community. Your brand.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/explore">
-              <motion.button 
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-8 py-4 rounded-2xl bg-surface border border-white/[0.06] text-white text-sm font-semibold hover:border-white/10 transition-colors"
-              >
-                Explore Events
-              </motion.button>
+      <section className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 py-10 pb-32">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <FadeInUp>
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-2">Happening Around You</h2>
+            <p className="text-sm text-white/50 font-medium">Explore events in your city or around the world.</p>
+          </FadeInUp>
+          <FadeInUp delay={0.1}>
+            <Link href="/explore" className="inline-flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white transition-all">
+              View all cities <MoveRight className="w-3 h-3" />
             </Link>
-            <Link href="/dashboard">
-              <GlowPulse glowColor="#6366f1" duration={3} className="rounded-2xl">
-                <motion.button 
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="px-8 py-4 rounded-2xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 transition-colors flex items-center gap-2"
-                >
-                  Host an Event <ArrowRight className="w-4 h-4" />
-                </motion.button>
-              </GlowPulse>
+          </FadeInUp>
+        </div>
+
+        <FadeInUp delay={0.2} className="w-full">
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-4 -mx-6 px-6 lg:mx-0 lg:px-0">
+            {CITIES.map(city => (
+              <CityCard key={city.name} {...city} />
+            ))}
+            
+            {/* Online Events Card */}
+            <Link href="/explore?q=online" className="group relative h-28 w-44 md:h-32 md:w-48 rounded-2xl overflow-hidden flex-shrink-0 snap-center border border-white/[0.04] bg-[#131B2F] hover:bg-[#1A233A] transition-colors flex flex-col items-center justify-center">
+              <Globe className="w-8 h-8 text-brand-primary mb-2 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+              <h4 className="text-white font-semibold text-sm">Online</h4>
+              <p className="text-[10px] text-white/50 font-medium mt-0.5">200+ events</p>
             </Link>
           </div>
         </FadeInUp>
       </section>
 
-      {/* Footer Bar */}
-      <footer className="relative z-10 w-full border-t border-white/[0.04] py-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <span className="text-xs text-muted/50">© {new Date().getFullYear()} EventJini. All rights reserved.</span>
-          <span className="text-xs text-muted/30 tracking-wider">THE EVENT OPERATING SYSTEM</span>
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* FOR ORGANIZERS - PREMIUM CTA                                 */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 pb-32">
+        <FadeInUp>
+          <div className="relative w-full rounded-[2rem] overflow-hidden bg-[#0A0D14] border border-white/[0.05] p-8 md:p-16 lg:p-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Ambient Background for CTA */}
+            <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
+              <div className="absolute top-[-50%] left-[-10%] w-[120%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-primary/20 via-[#0A0D14]/0 to-[#0A0D14]/0 blur-3xl" />
+              <div className="absolute bottom-[-50%] right-[-10%] w-[120%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-secondary/10 via-[#0A0D14]/0 to-[#0A0D14]/0 blur-3xl" />
+            </div>
+
+            <div className="relative z-10">
+              <h4 className="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase mb-6">For Organizers</h4>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tighter leading-[1.1] mb-6">
+                Create. Grow.<br />
+                <span className="text-brand-secondary">Build Communities.</span>
+              </h2>
+              <p className="text-base md:text-lg text-white/60 mb-10 max-w-md leading-relaxed font-medium">
+                Everything you need to host unforgettable events. Give your audience the experience they deserve.
+              </p>
+              <Link href="/dashboard">
+                <button className="px-8 py-4 rounded-full bg-brand-primary text-white text-sm font-bold tracking-wide hover:bg-brand-accent hover:scale-105 transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)] flex items-center gap-2">
+                  Start Hosting <MoveRight className="w-4 h-4" />
+                </button>
+              </Link>
+            </div>
+
+            <div className="relative z-10 flex flex-col gap-6 lg:pl-12">
+              {[
+                { icon: Sparkles, title: "Simple event setup", desc: "Go live in minutes, not hours." },
+                { icon: Globe, title: "Sell tickets securely", desc: "Powered by enterprise-grade infrastructure." },
+                { icon: Users, title: "Engage your audience", desc: "Built-in tools to manage and delight attendees." }
+              ].map((feature, i) => (
+                <div key={i} className="flex items-start gap-5 p-4 rounded-2xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/[0.04]">
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center flex-shrink-0 shadow-inner">
+                    <feature.icon className="w-5 h-5 text-brand-primary" />
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold text-base mb-1">{feature.title}</h5>
+                    <p className="text-sm text-white/50">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeInUp>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full border-t border-white/[0.04] py-12 bg-[#07090D]">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold">E</span>
+            </div>
+            <span className="text-sm font-bold text-white tracking-tight">EventJini</span>
+          </div>
+          <span className="text-[10px] text-white/40 tracking-widest uppercase font-semibold">The Event Operating System</span>
+          <span className="text-xs text-white/40 font-medium">© {new Date().getFullYear()} All rights reserved.</span>
         </div>
       </footer>
     </div>
   );
+}
+
+// Temporary icon for mapping
+function Users(props: any) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
 }

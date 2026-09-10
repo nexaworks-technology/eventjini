@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "./button";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const bgOpacity = useTransform(scrollY, [0, 50], [0, 1]);
+  const borderColor = useTransform(scrollY, [0, 50], ["rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]);
 
   const navLinks = [
     { href: "/explore", label: "Explore" },
@@ -26,7 +29,10 @@ export function Header() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 inset-x-0 z-50 h-16"
       >
-        <div className="absolute inset-0 bg-canvas/80 backdrop-blur-xl border-b border-white/[0.06]" />
+        <motion.div 
+          style={{ opacity: bgOpacity, borderBottomColor: borderColor }}
+          className="absolute inset-0 bg-[#07090D]/80 backdrop-blur-xl border-b" 
+        />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
           {/* Logo + Nav */}
