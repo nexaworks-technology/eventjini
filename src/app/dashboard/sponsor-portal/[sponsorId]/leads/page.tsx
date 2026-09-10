@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { GlassCard } from "@/components/ui/glass-card";
 import { FadeInUp } from "@/components/animations/motion";
 import { Users, Download, Mail, Building2, MapPin } from "lucide-react";
+import ExportCsvButton from "./export-button";
 
 export default async function SponsorLeadsPage({
   params,
@@ -60,10 +61,7 @@ export default async function SponsorLeadsPage({
             </p>
           </div>
           
-          <button className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-primary/20 transition-colors flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
+          <ExportCsvButton leads={mappedLeads} />
         </div>
 
         <div className="rounded-2xl overflow-hidden bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05]">
