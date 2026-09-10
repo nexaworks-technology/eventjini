@@ -27,7 +27,7 @@ export async function getTeamMembers(eventId: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching team members:", error);
+    console.error("Error fetching team members:", JSON.stringify(error, null, 2), error.message, error.details, error.hint, error.code);
     return { data: null, error: error.message };
   }
 
