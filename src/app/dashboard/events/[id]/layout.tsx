@@ -34,18 +34,42 @@ export default async function EventLayout({
     notFound();
   }
 
-  if (event.organizer_id !== user.id) {
+  // 1. Determine user role
+  let userRole = null;
+  
+  if (event.organizer_id === user.id) {
+    userRole = 'owner';
+  } else {
+    // Check if they are a team member
+    const { data: teamMember } = await supabase
+      .from('event_team_members')
+      .select('role')
+      .eq('event_id', eventId)
+      .eq('user_id', user.id)
+      .single();
+      
+    if (teamMember) {
+      userRole = teamMember.role;
+    }
+  }
+
+  // If no role, kick them out
+  if (!userRole) {
     redirect('/dashboard');
   }
 
-  const navItems = [
-    { name: 'Overview', href: `/dashboard/events/${eventId}`, icon: LayoutDashboard },
-    { name: 'Guests', href: `/dashboard/events/${eventId}/guests`, icon: Users },
-    { name: 'Analytics', href: `/dashboard/events/${eventId}/analytics`, icon: BarChart3 },
-    { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine },
-    { name: 'Broadcast', href: `/dashboard/events/${eventId}/broadcast`, icon: Radio },
-    { name: 'Team', href: `/dashboard/events/${eventId}/team`, icon: Shield },
+  // 2. Define all possible nav items and their allowed roles
+  const allNavItems = [
+    { name: 'Overview', href: `/dashboard/events/${eventId}`, icon: LayoutDashboard, roles: ['owner', 'admin', 'finance'] },
+    { name: 'Guests', href: `/dashboard/events/${eventId}/guests`, icon: Users, roles: ['owner', 'admin'] },
+    { name: 'Analytics', href: `/dashboard/events/${eventId}/analytics`, icon: BarChart3, roles: ['owner', 'admin', 'finance'] },
+    { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
+    { name: 'Broadcast', href: `/dashboard/events/${eventId}/broadcast`, icon: Radio, roles: ['owner', 'admin'] },
+    { name: 'Team', href: `/dashboard/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
   ];
+
+  // Filter based on user role
+  const navItems = allNavItems.filter(item => item.roles.includes(userRole as string));
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">

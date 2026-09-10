@@ -39,11 +39,24 @@ export default async function DashboardRootPage() {
     .eq("owner_id", user?.id)
     .single();
 
+  // Get team events
+  const { data: teamMemberships } = await supabase
+    .from("event_team_members")
+    .select("event_id, role")
+    .eq("user_id", user?.id);
+    
+  const teamEventIds = teamMemberships?.map(tm => tm.event_id) || [];
+  const teamMemberMap = new Map(teamMemberships?.map(tm => [tm.event_id, tm.role]) || []);
+
+  const orQuery = teamEventIds.length > 0 
+    ? `organizer_id.eq.${user?.id},id.in.(${teamEventIds.join(',')})`
+    : `organizer_id.eq.${user?.id}`;
+
   // Aggregate stats
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, slug, start_date, ticket_price_cents, capacity")
-    .eq("organizer_id", user?.id)
+    .select("id, title, slug, start_date, ticket_price_cents, capacity, organizer_id")
+    .or(orQuery)
     .order("start_date", { ascending: true });
 
   let totalRevenue = 0;
@@ -129,25 +142,37 @@ export default async function DashboardRootPage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {upcomingEvents.map((event: any) => (
-              <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block group">
-                <GlassCard level={2} animate={false} hoverGlow className="p-5 flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
-                      <Calendar className="w-5 h-5 text-brand-primary" />
+            {upcomingEvents.map((event: any) => {
+              const role = event.organizer_id === user.id ? 'owner' : teamMemberMap.get(event.id) as string;
+              const targetHref = role === 'scanner' ? `/dashboard/events/${event.id}/scanner` : `/dashboard/events/${event.id}`;
+              
+              return (
+                <Link key={event.id} href={targetHref} className="block group">
+                  <GlassCard level={2} animate={false} hoverGlow className="p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
+                        <Calendar className="w-5 h-5 text-brand-primary" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-base font-semibold text-white group-hover:text-brand-accent transition-colors">{event.title}</h3>
+                          {role !== 'owner' && (
+                            <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                              {role}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted mt-0.5">
+                          {new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {event.capacity > 0 && ` · ${event.capacity} capacity`}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-white group-hover:text-brand-accent transition-colors">{event.title}</h3>
-                      <p className="text-sm text-muted">
-                        {new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        {event.capacity > 0 && ` · ${event.capacity} capacity`}
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted group-hover:text-brand-primary transition-colors" />
-                </GlassCard>
-              </Link>
-            ))}
+                    <ArrowRight className="w-4 h-4 text-muted group-hover:text-brand-primary transition-colors" />
+                  </GlassCard>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
