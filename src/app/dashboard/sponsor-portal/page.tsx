@@ -15,7 +15,7 @@ export default async function SponsorPortalList() {
   if (!user) redirect('/login');
 
   // Fetch all sponsorships for this user
-  const { data: sponsorships } = await supabase
+  const { data: sponsorships, error: sponsorError } = await supabase
     .from('sponsor_registrations')
     .select(`
       id,
@@ -34,15 +34,24 @@ export default async function SponsorPortalList() {
     `)
     .eq('sponsor_user_id', user.id);
 
+  console.log("Sponsor Portal Fetch - User:", user.id);
+  console.log("Sponsor Portal Fetch - Error:", sponsorError);
+  console.log("Sponsor Portal Fetch - Data:", JSON.stringify(sponsorships, null, 2));
+
   if (!sponsorships || sponsorships.length === 0) {
     return (
       <div className="flex-1 p-8 overflow-y-auto w-full flex items-center justify-center">
         <GlassCard level={2} className="p-12 max-w-lg text-center">
           <Building2 className="w-16 h-16 text-muted/50 mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-white mb-3">No Sponsorships Found</h2>
-          <p className="text-muted mb-8">
+          <p className="text-muted mb-4">
             You are not currently registered as a sponsor for any events. Browse our upcoming events to become a sponsor.
           </p>
+          {sponsorError && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6 text-sm text-left font-mono">
+              Raw DB Error: {JSON.stringify(sponsorError)}
+            </div>
+          )}
           <Link href="/explore">
             <button className="bg-brand-primary text-white font-bold py-3 px-6 rounded-xl hover:bg-brand-accent transition-colors">
               Explore Events

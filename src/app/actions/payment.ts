@@ -125,14 +125,18 @@ export async function verifySponsorPaymentAndRegister(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in to sponsor an event." };
 
-  const { error } = await supabase
+  const { data: insertedData, error } = await supabase
     .from("sponsor_registrations")
     .insert({
       tier_id: tierId,
       sponsor_user_id: user.id,
       company_name: companyName,
       status: "paid"
-    });
+    })
+    .select();
+
+  console.log("Insert Sponsor Result - Error:", error);
+  console.log("Insert Sponsor Result - Data:", insertedData);
 
   if (error) {
     console.error("Error inserting sponsor:", error);
