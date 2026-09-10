@@ -31,7 +31,7 @@ export default function LoginPage() {
       if (redirect) {
         router.push(redirect);
       } else {
-        router.push("/dashboard");
+        router.push("/explore");
       }
     }
   }

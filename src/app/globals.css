@@ -1,19 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #ededed;
+  /* Level 1: Application Canvas (Almost-black navy) */
+  --bg-level-1: #07090D;
+  
+  /* Level 2: Structural Surfaces (Slightly lighter navy) */
+  --bg-level-2: #0D1118;
+  
+  /* Level 3: Premium Surfaces (Glass) */
+  --bg-level-3: rgba(255, 255, 255, 0.03);
+  --border-glass: rgba(255, 255, 255, 0.08);
+
+  /* Primary Brand */
+  --brand-primary: #6366f1; /* Indigo */
+  --brand-secondary: #8b5cf6; /* Violet */
+  --brand-accent: #06b6d4; /* Cyan */
+  
+  /* Dynamic Event Colors */
+  --event-tech: #8b5cf6; /* Violet */
+  --event-music: #d946ef; /* Magenta */
+  --event-business: #3b82f6; /* Blue */
+  --event-design: #f97316; /* Orange */
+  --event-wellness: #10b981; /* Green */
+
+  --foreground: #f8fafc;
+  --foreground-muted: #94a3b8;
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-canvas: var(--bg-level-1);
+  --color-surface: var(--bg-level-2);
+  --color-glass: var(--bg-level-3);
+  --color-glass-border: var(--border-glass);
+  
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+  
+  --color-event-tech: var(--event-tech);
+  --color-event-music: var(--event-music);
+  --color-event-business: var(--event-business);
+  --color-event-design: var(--event-design);
+  --color-event-wellness: var(--event-wellness);
+
   --color-foreground: var(--foreground);
+  --color-muted: var(--foreground-muted);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
+  background: var(--bg-level-1);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for OS feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

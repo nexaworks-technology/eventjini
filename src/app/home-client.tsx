@@ -5,147 +5,250 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeInUp, GlowPulse } from "@/components/animations/motion";
 import { Header } from "@/components/ui/header";
+import { EventCard } from "@/components/ui/event-card";
+import { Calendar, MapPin, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { Calendar, MapPin, ChevronRight } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
-
-// (Keep FloatingOrb definition exactly as is)
-function FloatingOrb({
-  color,
-  size,
-  initialX,
-  initialY,
-  duration,
-}: {
-  color: string;
-  size: number;
-  initialX: string;
-  initialY: string;
-  duration: number;
-}) {
+/* ---- Ambient background ---- */
+function AmbientGlow({ color, size, x, y, delay = 0 }: { color: string; size: number; x: string; y: string; delay?: number }) {
   return (
     <motion.div
-      className="pointer-events-none absolute rounded-full opacity-30"
+      className="pointer-events-none absolute rounded-full"
       style={{
         width: size,
         height: size,
         background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-        filter: "blur(80px)",
-        top: initialY,
-        left: initialX,
+        filter: "blur(120px)",
+        opacity: 0.15,
+        top: y,
+        left: x,
       }}
       animate={{
-        x: [0, 60, -40, 20, 0],
-        y: [0, -50, 30, -20, 0],
+        x: [0, 40, -30, 15, 0],
+        y: [0, -30, 20, -15, 0],
+        opacity: [0.15, 0.22, 0.15],
       }}
       transition={{
-        duration,
+        duration: 20,
         repeat: Infinity,
         ease: "easeInOut",
+        delay,
       }}
     />
   );
 }
 
 export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push("/explore");
+    }
+  };
+
+  // Pick the first event as the "featured" immersive card
+  const featuredEvent = featuredEvents?.[0];
+  const remainingEvents = featuredEvents?.slice(1, 4) || [];
+
   return (
-    <div className="relative flex min-h-screen flex-col items-center overflow-hidden bg-[#050505]">
+    <div className="relative flex flex-col items-center overflow-hidden bg-canvas min-h-screen">
       <Header />
       
-      <FloatingOrb color="#06b6d4" size={500} initialX="-10%" initialY="10%" duration={18} />
-      <FloatingOrb color="#a855f7" size={450} initialX="60%" initialY="50%" duration={22} />
+      {/* Ambient atmospheric gradients */}
+      <AmbientGlow color="#6366f1" size={600} x="-5%" y="5%" />
+      <AmbientGlow color="#8b5cf6" size={500} x="65%" y="15%" delay={3} />
+      <AmbientGlow color="#06b6d4" size={400} x="30%" y="60%" delay={6} />
 
-      {/* Hero Section */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full min-h-screen pt-20 pb-12">
-        <FadeInUp className="relative z-10 w-full max-w-xl px-4">
-          <div className="flex flex-col items-center gap-8 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-10 shadow-2xl backdrop-blur-[24px] sm:p-14">
-            <FadeInUp delay={0.15}>
-              <div className="relative h-20 w-20 overflow-hidden rounded-2xl ring-1 ring-white/10">
-                <Image src="/logo.jpg" alt="EventJini logo" fill className="object-cover" priority />
-              </div>
-            </FadeInUp>
-
-            <FadeInUp delay={0.3}>
-              <h1 className="text-center text-5xl font-bold tracking-tight sm:text-6xl">
-                <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                  EventJini
-                </span>
-              </h1>
-            </FadeInUp>
-
-            <FadeInUp delay={0.45}>
-              <p className="max-w-sm text-center text-lg leading-relaxed text-white/70">
-                Seamlessly manage, host, and experience world-class events.
-              </p>
-            </FadeInUp>
-
-            <FadeInUp delay={0.6} className="w-full">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full mt-4">
-                <Link href="/explore" className="w-full sm:w-auto">
-                  <button className="w-full rounded-xl border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white transition-all hover:bg-white/10 hover:border-white/20 hover:scale-105 active:scale-95">
-                    Explore Events
-                  </button>
-                </Link>
-                <Link href="/dashboard" className="w-full sm:w-auto">
-                  <GlowPulse glowColor="#06b6d4" duration={2.5} className="rounded-xl w-full">
-                    <button className="w-full rounded-xl bg-cyan-500 px-8 py-3.5 text-sm font-semibold text-black transition-all hover:bg-cyan-400 hover:scale-105 active:scale-95">
-                      Host an Event
-                    </button>
-                  </GlowPulse>
-                </Link>
-              </div>
-            </FadeInUp>
-          </div>
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* HERO SECTION                                               */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 pt-32 pb-16 md:pt-44 md:pb-24">
+        
+        {/* Navigation Pillars */}
+        <FadeInUp className="flex items-center justify-center gap-8 mb-12">
+          <Link href="/explore" className="text-sm font-medium text-muted hover:text-white transition-colors">
+            Discover
+          </Link>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <Link href="/dashboard" className="text-sm font-medium text-muted hover:text-white transition-colors">
+            Create
+          </Link>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <Link href="/my-tickets" className="text-sm font-medium text-muted hover:text-white transition-colors">
+            Connect
+          </Link>
         </FadeInUp>
-      </div>
 
-      {/* Featured Events Carousel */}
+        {/* Editorial Typography */}
+        <FadeInUp delay={0.15} className="text-center mb-10">
+          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-[0.9] text-white">
+            EVENTS
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent">
+              THAT MOVE
+            </span>
+            <br />
+            PEOPLE.
+          </h1>
+        </FadeInUp>
+
+        {/* Search Bar */}
+        <FadeInUp delay={0.3} className="max-w-2xl mx-auto mb-6">
+          <form onSubmit={handleSearch} className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted group-focus-within:text-brand-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search events, people, places..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-surface border border-white/[0.06] rounded-2xl pl-14 pr-6 py-4 text-base text-white placeholder-muted/60 focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all"
+            />
+          </form>
+        </FadeInUp>
+
+        {/* Sub-tagline */}
+        <FadeInUp delay={0.4}>
+          <p className="text-center text-muted text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+            The operating system for discovering, creating, and experiencing events.
+          </p>
+        </FadeInUp>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* TRENDING NOW                                               */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {featuredEvents && featuredEvents.length > 0 && (
-        <FadeInUp delay={0.8} className="w-full max-w-7xl mx-auto px-6 pb-32 relative z-10">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-white tracking-tight">Trending Events</h2>
-            <Link href="/explore" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium flex items-center gap-1 transition-colors">
-              View All <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
+        <section className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-20">
+          <FadeInUp delay={0.5}>
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
+                <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                  TRENDING NOW
+                </h2>
+              </div>
+              <Link href="/explore" className="text-brand-primary hover:text-brand-accent text-sm font-medium flex items-center gap-1.5 transition-colors group">
+                View All <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          </FadeInUp>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredEvents.slice(0, 3).map((event: any) => (
-              <Link href={`/e/${event.slug}`} key={event.id} className="group block">
-                <GlassCard hoverGlow className="h-full p-0 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1">
-                  <div className="relative h-48 w-full bg-[#111]">
-                    {event.banner_url ? (
-                      <Image src={event.banner_url} alt={event.title} fill className="object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#111] to-[#222]" />
-                    )}
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-xs font-semibold text-white">
-                      {event.ticket_price_cents > 0 ? `₹${(event.ticket_price_cents / 100).toFixed(2)}` : "FREE"}
+          {/* Featured Event — Immersive Large Card */}
+          {featuredEvent && (
+            <FadeInUp delay={0.6} className="mb-8">
+              <Link href={`/e/${featuredEvent.slug}`} className="group block">
+                <div className="relative h-[320px] md:h-[400px] rounded-3xl overflow-hidden bg-surface border border-white/[0.06]">
+                  {featuredEvent.banner_url ? (
+                    <Image 
+                      src={featuredEvent.banner_url} 
+                      alt={featuredEvent.title} 
+                      fill 
+                      className="object-cover opacity-60 group-hover:opacity-75 group-hover:scale-[1.03] transition-all duration-700" 
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-surface to-canvas" />
+                  )}
+                  
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/60 to-transparent" />
+                  
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="w-4 h-4 text-brand-primary" />
+                      <span className="text-xs font-semibold text-brand-primary uppercase tracking-widest">Featured</span>
+                    </div>
+                    <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight group-hover:text-brand-accent transition-colors">
+                      {featuredEvent.title}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-6 text-sm text-muted">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-brand-primary" />
+                        <span>{new Date(featuredEvent.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-brand-secondary" />
+                        <span>{featuredEvent.location_name || "TBA"}</span>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-cyan-400 transition-colors">
-                      {event.title}
-                    </h3>
-                    
-                    <div className="space-y-2 mt-auto pt-4 border-t border-white/5">
-                      <div className="flex items-center text-sm text-slate-400">
-                        <Calendar className="w-4 h-4 mr-2 text-cyan-500" />
-                        <span>{new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-slate-400">
-                        <MapPin className="w-4 h-4 mr-2 text-purple-500" />
-                        <span className="line-clamp-1">{event.location_name || "TBA"}</span>
-                      </div>
-                    </div>
+                  {/* Price Badge */}
+                  <div className="absolute top-6 right-6 bg-canvas/70 backdrop-blur-xl border border-glass-border px-4 py-2 rounded-full">
+                    <span className="text-sm font-bold text-white">
+                      {featuredEvent.ticket_price_cents > 0 
+                        ? `₹${(featuredEvent.ticket_price_cents / 100).toFixed(0)}`
+                        : "FREE"}
+                    </span>
                   </div>
-                </GlassCard>
+                </div>
               </Link>
-            ))}
+            </FadeInUp>
+          )}
+          
+          {/* Remaining Events — Standard Cards */}
+          {remainingEvents.length > 0 && (
+            <FadeInUp delay={0.7}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {remainingEvents.map((event: any) => (
+                  <EventCard key={event.id} event={event} href={`/e/${event.slug}`} />
+                ))}
+              </div>
+            </FadeInUp>
+          )}
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* FOOTER / CTA                                               */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 w-full border-t border-white/[0.04] py-24">
+        <FadeInUp className="text-center">
+          <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-6">
+            MORE THAN EVENTS.
+          </h2>
+          <p className="text-muted text-lg max-w-md mx-auto mb-10">
+            Build. Host. Grow. Your events. Your community. Your brand.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/explore">
+              <motion.button 
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-8 py-4 rounded-2xl bg-surface border border-white/[0.06] text-white text-sm font-semibold hover:border-white/10 transition-colors"
+              >
+                Explore Events
+              </motion.button>
+            </Link>
+            <Link href="/dashboard">
+              <GlowPulse glowColor="#6366f1" duration={3} className="rounded-2xl">
+                <motion.button 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="px-8 py-4 rounded-2xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 transition-colors flex items-center gap-2"
+                >
+                  Host an Event <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </GlowPulse>
+            </Link>
           </div>
         </FadeInUp>
-      )}
+      </section>
+
+      {/* Footer Bar */}
+      <footer className="relative z-10 w-full border-t border-white/[0.04] py-8">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <span className="text-xs text-muted/50">© {new Date().getFullYear()} EventJini. All rights reserved.</span>
+          <span className="text-xs text-muted/30 tracking-wider">THE EVENT OPERATING SYSTEM</span>
+        </div>
+      </footer>
     </div>
   );
 }

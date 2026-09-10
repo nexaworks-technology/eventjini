@@ -2,156 +2,185 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Search, DollarSign, Filter } from "lucide-react";
+import { EventCard } from "@/components/ui/event-card";
+import { Calendar, MapPin, Users, Search, DollarSign, Sparkles } from "lucide-react";
 import { FadeInUp, StaggerContainer, staggerChildVariants } from "@/components/animations/motion";
 import { motion } from "framer-motion";
 
+const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "free", label: "Free" },
+  { id: "paid", label: "Paid" },
+  { id: "tech", label: "Tech" },
+  { id: "business", label: "Business" },
+  { id: "design", label: "Design" },
+  { id: "music", label: "Music" },
+  { id: "community", label: "Community" },
+];
+
 export default function ExploreClient({ initialEvents, error }: { initialEvents: any[], error?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "free" | "paid">("all");
+  const [activeCategory, setActiveCategory] = useState("all");
 
   const filteredEvents = initialEvents.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (event.location_name && event.location_name.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    if (filter === "free") return matchesSearch && !event.is_paid;
-    if (filter === "paid") return matchesSearch && event.is_paid;
+    if (activeCategory === "free") return matchesSearch && !event.is_paid;
+    if (activeCategory === "paid") return matchesSearch && event.is_paid;
+    // For category filters like tech/business/design etc, we pass through for now
+    // since the DB doesn't have category tags yet
     return matchesSearch;
   });
 
+  const featuredEvent = filteredEvents[0];
+  const gridEvents = filteredEvents.slice(1);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-32 pb-24">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <FadeInUp>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
-            Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Events</span>
-          </h1>
-          <p className="text-lg text-white/60 max-w-2xl">
-            Find and join the best hackathons, tech meetups, and developer conferences happening around you.
-          </p>
-        </FadeInUp>
+    <div className="max-w-7xl mx-auto px-6 pt-28 pb-24">
 
-        <FadeInUp delay={0.1} className="w-full md:w-auto">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input 
-                type="text"
-                placeholder="Search events or locations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-500/50 transition-colors"
-              />
-            </div>
-            
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
-              <button 
-                onClick={() => setFilter("all")}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "all" ? "bg-white/10 text-white" : "text-white/60 hover:text-white"}`}
-              >
-                All
-              </button>
-              <button 
-                onClick={() => setFilter("free")}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "free" ? "bg-white/10 text-white" : "text-white/60 hover:text-white"}`}
-              >
-                Free
-              </button>
-              <button 
-                onClick={() => setFilter("paid")}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "paid" ? "bg-white/10 text-white" : "text-white/60 hover:text-white"}`}
-              >
-                Paid
-              </button>
-            </div>
+      {/* ── Page Header ── */}
+      <FadeInUp className="mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <p className="text-sm font-medium text-brand-primary uppercase tracking-widest mb-3">Explore</p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
+              Discover what's happening.
+            </h1>
           </div>
-        </FadeInUp>
-      </div>
+          
+          <div className="flex items-center gap-2 text-muted text-sm">
+            <span className="w-2 h-2 rounded-full bg-event-wellness animate-pulse" />
+            <span>{initialEvents.length} events found</span>
+          </div>
+        </div>
+      </FadeInUp>
 
+      {/* ── Search + Filters ── */}
+      <FadeInUp delay={0.1} className="mb-12">
+        <div className="flex flex-col gap-5">
+          {/* Search */}
+          <div className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted group-focus-within:text-brand-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search events, topics, or cities..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-surface border border-white/[0.06] rounded-2xl pl-14 pr-6 py-4 text-base text-white placeholder-muted/60 focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all"
+            />
+          </div>
+          
+          {/* Category Pills */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <motion.button
+                key={cat.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeCategory === cat.id 
+                    ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/20" 
+                    : "bg-surface border border-white/[0.06] text-muted hover:text-white hover:border-white/10"
+                }`}
+              >
+                {cat.label}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </FadeInUp>
+
+      {/* ── Content ── */}
       {error ? (
-        <div className="text-red-400 p-4 rounded-xl bg-red-400/10 border border-red-400/20 text-center">
+        <div className="text-red-400 p-6 rounded-2xl bg-red-400/5 border border-red-400/10 text-center">
           Failed to load events: {error}
         </div>
       ) : filteredEvents.length > 0 ? (
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event: any, index: number) => (
-            <motion.div key={event.id} variants={staggerChildVariants}>
-              <Link href={`/e/${event.slug}`} className="block h-full transition-transform hover:-translate-y-1 duration-300">
-                <GlassCard hoverGlow animate={false} className="h-full flex flex-col overflow-hidden p-0 border border-white/10 group">
+        <div className="space-y-12">
+          
+          {/* Featured Event — Large Immersive Card */}
+          {featuredEvent && (
+            <FadeInUp delay={0.2}>
+              <Link href={`/e/${featuredEvent.slug}`} className="group block">
+                <div className="relative h-[280px] md:h-[380px] rounded-3xl overflow-hidden bg-surface border border-white/[0.06]">
+                  {featuredEvent.banner_url ? (
+                    <Image 
+                      src={featuredEvent.banner_url} 
+                      alt={featuredEvent.title} 
+                      fill 
+                      className="object-cover opacity-50 group-hover:opacity-70 group-hover:scale-[1.03] transition-all duration-700" 
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/15 via-surface to-canvas" />
+                  )}
                   
-                  {/* Event Image / Gradient Placeholder */}
-                  <div className={`h-48 w-full bg-gradient-to-br ${event.theme_gradient || 'from-slate-800 to-slate-900'} relative`}>
-                    {event.banner_url ? (
-                      <img src={event.banner_url} alt={event.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                    ) : (
-                      <div className="absolute inset-0 opacity-20 bg-[url('/noise.png')] mix-blend-overlay"></div>
-                    )}
-                    
-                    {/* Price Badge */}
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                      {event.is_paid ? (
-                        <>
-                          <DollarSign className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="text-xs font-semibold text-white">{event.ticket_price_cents / 100}</span>
-                        </>
-                      ) : (
-                        <span className="text-xs font-semibold text-emerald-400">Free</span>
-                      )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/50 to-transparent" />
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-brand-primary" />
+                      <span className="text-xs font-semibold text-brand-primary uppercase tracking-widest">Featured</span>
                     </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6 flex flex-col flex-1">
-                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
-                      {event.title}
+                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight group-hover:text-brand-accent transition-colors">
+                      {featuredEvent.title}
                     </h3>
-                    
-                    <div className="space-y-2 mt-4 mb-6">
-                      <div className="flex items-center text-sm text-slate-300">
-                        <Calendar className="w-4 h-4 mr-3 text-cyan-400 shrink-0" />
-                        <span>{new Date(event.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                    <div className="flex flex-wrap items-center gap-6 text-sm text-muted">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-brand-primary" />
+                        <span>{new Date(featuredEvent.start_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                       </div>
-                      <div className="flex items-center text-sm text-slate-300">
-                        <MapPin className="w-4 h-4 mr-3 text-purple-400 shrink-0" />
-                        <span className="truncate">{event.location_name || "TBA"}</span>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-brand-secondary" />
+                        <span>{featuredEvent.location_name || "TBA"}</span>
                       </div>
-                      <div className="flex items-center text-sm text-slate-300">
-                        <Users className="w-4 h-4 mr-3 text-slate-400 shrink-0" />
-                        <span>{event.capacity ? `${event.capacity} Spots` : "Open Event"}</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-muted" />
+                        <span>{featuredEvent.capacity ? `${featuredEvent.capacity} Spots` : "Open"}</span>
                       </div>
-                    </div>
-                    
-                    <div className="mt-auto pt-4 border-t border-white/5 flex items-center gap-3">
-                      {event.organizer?.avatar_url ? (
-                        <img src={event.organizer.avatar_url} className="w-6 h-6 rounded-full bg-white/10" alt="" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500 to-purple-500" />
-                      )}
-                      <span className="text-xs text-slate-400 font-medium truncate">
-                        By {event.organizer?.full_name || "EventJini Organizer"}
-                      </span>
                     </div>
                   </div>
-                </GlassCard>
+                  
+                  <div className="absolute top-6 right-6 bg-canvas/70 backdrop-blur-xl border border-glass-border px-4 py-2 rounded-full">
+                    <span className="text-sm font-bold text-white">
+                      {featuredEvent.ticket_price_cents > 0 
+                        ? `₹${(featuredEvent.ticket_price_cents / 100).toFixed(0)}`
+                        : "FREE"}
+                    </span>
+                  </div>
+                </div>
               </Link>
-            </motion.div>
-          ))}
-        </StaggerContainer>
+            </FadeInUp>
+          )}
+
+          {/* Event Grid */}
+          {gridEvents.length > 0 && (
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gridEvents.map((event: any) => (
+                <motion.div key={event.id} variants={staggerChildVariants}>
+                  <EventCard event={event} href={`/e/${event.slug}`} />
+                </motion.div>
+              ))}
+            </StaggerContainer>
+          )}
+        </div>
       ) : (
-        <div className="py-32 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
-            <Search className="w-8 h-8 text-white/20" />
+        <FadeInUp className="py-32 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center mb-6 border border-white/[0.06]">
+            <Search className="w-8 h-8 text-muted/40" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No events found</h3>
-          <p className="text-white/50 max-w-sm">
-            We couldn't find any events matching your current filters. Try adjusting your search query.
+          <h3 className="text-2xl font-bold text-white mb-3">No events found</h3>
+          <p className="text-muted max-w-sm mb-8">
+            We couldn't find anything matching your filters. Try a different search or category.
           </p>
-          <Button variant="secondary" className="mt-6" onClick={() => { setSearchQuery(""); setFilter("all"); }}>
+          <Button variant="secondary" onClick={() => { setSearchQuery(""); setActiveCategory("all"); }}>
             Clear Filters
           </Button>
-        </div>
+        </FadeInUp>
       )}
     </div>
   );

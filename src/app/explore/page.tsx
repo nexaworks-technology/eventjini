@@ -11,7 +11,7 @@ export default async function ExplorePage() {
   const { data: events, error } = await getPublicEvents();
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
+    <main className="min-h-screen bg-canvas text-white">
       <Header />
       <ExploreClient initialEvents={events || []} error={error} />
     </main>

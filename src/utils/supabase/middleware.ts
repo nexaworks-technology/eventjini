@@ -55,7 +55,7 @@ export const updateSession = async (request: NextRequest) => {
       url.pathname = redirectParam;
       url.search = ''; // clear query params
     } else {
-      url.pathname = '/my-tickets'; // Default landing for attendees now
+      url.pathname = '/explore'; // Default landing for all users
     }
     return NextResponse.redirect(url);
   }
