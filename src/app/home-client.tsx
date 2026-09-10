@@ -13,10 +13,10 @@ import { useRouter } from "next/navigation";
 
 const CATEGORIES = ["Tech", "Business", "Music", "Design", "Wellness", "Community"];
 const CITIES = [
-  { name: "Mumbai", count: 120, image: "https://images.unsplash.com/photo-1522206090757-558661674482?q=80&w=800&auto=format&fit=crop" },
-  { name: "Delhi", count: 80, image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=800&auto=format&fit=crop" },
-  { name: "Bengaluru", count: 70, image: "https://images.unsplash.com/photo-1596443686812-2f45229eebc3?q=80&w=800&auto=format&fit=crop" },
-  { name: "Hyderabad", count: 45, image: "https://images.unsplash.com/photo-1573887163889-4876b509f6b9?q=80&w=800&auto=format&fit=crop" }
+  { name: "Mumbai", count: 120, image: "/demo/mumbai.jpg" },
+  { name: "Delhi", count: 80, image: "/demo/delhi.jpg" },
+  { name: "Bengaluru", count: 70, image: "/demo/bengaluru.jpg" },
+  { name: "Hyderabad", count: 45, image: "/demo/hyderabad.jpg" }
 ];
 
 export default function HomeClient({ featuredEvents }: { featuredEvents: any[] }) {
