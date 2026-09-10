@@ -5,34 +5,26 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 
-export async function registerForEvent(eventId: string, jobTitle?: string, companySize?: string) {
+export async function registerForEvent(
+  eventId: string, 
+  guestData?: {
+    email: string;
+    name: string;
+    company: string;
+    jobTitle: string;
+    isStudent: boolean;
+    college: string;
+  }
+) {
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return { error: "Unauthorized" };
-    }
-
-    // 0. Update the user's demographic info if provided
-    if (jobTitle || companySize) {
-      await supabase
-        .from("profiles")
-        .update({
-          ...(jobTitle ? { job_title: jobTitle } : {}),
-          ...(companySize ? { company_size: companySize } : {})
-        })
-        .eq("id", user.id);
-    }
-
-    // 1. Fetch event to see if it requires approval
+    // 1. Fetch event to see if it requires approval or B2B data
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("requires_approval")
+      .select("requires_approval, require_b2b_data")
       .eq("id", eventId)
       .single();
 
@@ -40,35 +32,51 @@ export async function registerForEvent(eventId: string, jobTitle?: string, compa
       return { error: "Event not found" };
     }
 
-    // 2. Check if user is already registered for this event
-    const { data: existingReg } = await supabase
-      .from("registrations")
-      .select("ticket_code")
-      .eq("event_id", eventId)
-      .eq("user_id", user.id)
-      .single();
+    // 2. Check if user/email is already registered
+    let existingRegQuery = supabase.from("registrations").select("ticket_code").eq("event_id", eventId);
+    
+    if (user) {
+      existingRegQuery = existingRegQuery.eq("user_id", user.id);
+    } else if (guestData?.email) {
+      existingRegQuery = existingRegQuery.eq("guest_email", guestData.email);
+    } else {
+      return { error: "Email or authentication is required." };
+    }
+
+    const { data: existingReg } = await existingRegQuery.single();
 
     if (existingReg) {
-      // If already registered, just return their existing ticket code so they get redirected to it!
       return { data: { ticket_code: existingReg.ticket_code } };
     }
 
     // 3. Generate a unique ticket code
     const ticketCode = crypto.randomBytes(4).toString("hex").toUpperCase();
-
-    // 4. Create the registration
     const status = event.requires_approval ? "pending" : "approved";
+
+    // 4. Create the registration payload
+    const payload: any = {
+      event_id: eventId,
+      status,
+      approval_status: event.requires_approval ? 'pending' : 'auto_approved',
+      ticket_code: ticketCode,
+    };
+
+    if (user) {
+      payload.user_id = user.id;
+    }
+    
+    if (guestData) {
+      payload.guest_email = guestData.email;
+      payload.guest_name = guestData.name;
+      payload.guest_company = guestData.company;
+      payload.guest_job_title = guestData.jobTitle;
+      payload.guest_is_student = guestData.isStudent;
+      payload.guest_college = guestData.college;
+    }
 
     const { data: registration, error: regError } = await supabase
       .from("registrations")
-      .insert([
-        {
-          event_id: eventId,
-          user_id: user.id,
-          status,
-          ticket_code: ticketCode,
-        },
-      ])
+      .insert([payload])
       .select()
       .single();
 
@@ -77,7 +85,7 @@ export async function registerForEvent(eventId: string, jobTitle?: string, compa
       return { error: regError.message };
     }
 
-    revalidatePath("/dashboard/tickets");
+    revalidatePath("/my-tickets");
     return { data: { ticket_code: registration.ticket_code } };
   } catch (err: any) {
     console.error("Error in registerForEvent:", err);

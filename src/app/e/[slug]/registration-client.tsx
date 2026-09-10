@@ -24,6 +24,7 @@ interface EventRegistrationClientProps {
   capacity: number;
   registeredCount: number;
   isLoggedIn: boolean;
+  requireB2bData: boolean;
 }
 
 export default function EventRegistrationClient({
@@ -34,24 +35,57 @@ export default function EventRegistrationClient({
   capacity,
   registeredCount,
   isLoggedIn,
+  requireB2bData,
 }: EventRegistrationClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [jobTitle, setJobTitle] = useState("");
-  const [companySize, setCompanySize] = useState("");
+  // Guest Data State
+  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestCompany, setGuestCompany] = useState("");
+  const [guestJobTitle, setGuestJobTitle] = useState("");
+  const [isStudent, setIsStudent] = useState(false);
+  const [guestCollege, setGuestCollege] = useState("");
   
-  const handleRegister = () => {
-    if (!isLoggedIn) {
-      router.push(`/login?redirect=${window.location.pathname}`);
+  const handleRegister = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!isLoggedIn && !showGuestForm) {
+      setShowGuestForm(true);
       return;
+    }
+
+    if (!isLoggedIn && showGuestForm) {
+      if (!guestEmail || !guestName) {
+        setError("Email and Name are required.");
+        return;
+      }
+      if (requireB2bData && !isStudent && (!guestCompany || !guestJobTitle)) {
+        setError("Company and Job Title are required.");
+        return;
+      }
+      if (requireB2bData && isStudent && !guestCollege) {
+        setError("College name is required.");
+        return;
+      }
     }
 
     setError(null);
     startTransition(async () => {
+      const guestData = !isLoggedIn ? {
+        email: guestEmail,
+        name: guestName,
+        company: guestCompany,
+        jobTitle: guestJobTitle,
+        isStudent: isStudent,
+        college: guestCollege
+      } : undefined;
+
       if (isFree) {
-        const res = await registerForEvent(eventId, jobTitle, companySize);
+        const res = await registerForEvent(eventId, guestData);
         if (res.error) {
           setError(res.error);
         } else if (res.data?.ticket_code) {
@@ -76,13 +110,14 @@ export default function EventRegistrationClient({
         description: "Event Ticket Registration",
         order_id: orderRes.data.orderId,
         handler: async function (response: any) {
+          // Note: verification would also need to accept guest data in a real production flow
+          // but for MVP, we just verify the payment.
           const verifyRes = await verifyPaymentAndRegister(
             eventId,
             response.razorpay_order_id,
             response.razorpay_payment_id,
             response.razorpay_signature,
-            jobTitle,
-            companySize
+            guestData
           );
 
           if (verifyRes.error) {
@@ -131,44 +166,7 @@ export default function EventRegistrationClient({
           <span>{registeredCount} / {capacity} Registered</span>
         </div>
 
-        {/* Auth / Form */}
-        {isLoggedIn ? (
-          <div className="w-full space-y-5 mb-8">
-            <div className="space-y-1.5 text-left">
-              <label className="text-xs font-semibold text-muted uppercase tracking-widest pl-1">Job Title (Optional)</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Designer" 
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="w-full bg-canvas border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-muted/40 focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all"
-              />
-            </div>
-            
-            <div className="space-y-1.5 text-left">
-              <label className="text-xs font-semibold text-muted uppercase tracking-widest pl-1">Company Size (Optional)</label>
-              <select 
-                value={companySize}
-                onChange={(e) => setCompanySize(e.target.value)}
-                className="w-full bg-canvas border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-primary/40 focus:ring-1 focus:ring-brand-primary/20 transition-all appearance-none"
-              >
-                <option value="" className="bg-canvas">Select size</option>
-                <option value="1-10" className="bg-canvas">1-10 employees</option>
-                <option value="11-50" className="bg-canvas">11-50 employees</option>
-                <option value="51-200" className="bg-canvas">51-200 employees</option>
-                <option value="201-1000" className="bg-canvas">201-1000 employees</option>
-                <option value="1000+" className="bg-canvas">1000+ employees</option>
-              </select>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full bg-canvas border border-white/[0.04] rounded-2xl p-5 mb-8 flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-white font-medium">Create an account to attend</p>
-            <p className="text-xs text-muted leading-relaxed">
-              You need an EventJini profile so we can issue your personalized digital ticket.
-            </p>
-          </div>
-        )}
+
 
         {/* Alerts */}
         {showUrgency && !isSoldOut && (
@@ -191,6 +189,91 @@ export default function EventRegistrationClient({
           </div>
         )}
 
+        {/* Guest Form */}
+        {showGuestForm && !isLoggedIn && (
+          <form id="guest-form" onSubmit={handleRegister} className="w-full space-y-4 mb-8">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Guest Details</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted uppercase tracking-wider">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={guestName}
+                  onChange={e => setGuestName(e.target.value)}
+                  className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted uppercase tracking-wider">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={guestEmail}
+                  onChange={e => setGuestEmail(e.target.value)}
+                  className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                  placeholder="john@example.com"
+                />
+              </div>
+            </div>
+
+            {requireB2bData && (
+              <div className="pt-4 border-t border-white/5 space-y-4">
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/[0.02] cursor-pointer hover:bg-white/[0.04] transition-colors">
+                  <input 
+                    type="checkbox"
+                    checked={isStudent}
+                    onChange={e => setIsStudent(e.target.checked)}
+                    className="w-4 h-4 rounded bg-surface border-white/20 text-brand-primary focus:ring-brand-primary/50"
+                  />
+                  <span className="text-sm font-medium text-white">I am currently a student</span>
+                </label>
+
+                {isStudent ? (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider">College / University</label>
+                    <input
+                      type="text"
+                      required
+                      value={guestCollege}
+                      onChange={e => setGuestCollege(e.target.value)}
+                      className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                      placeholder="e.g. Stanford University"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-muted uppercase tracking-wider">Company</label>
+                      <input
+                        type="text"
+                        required
+                        value={guestCompany}
+                        onChange={e => setGuestCompany(e.target.value)}
+                        className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                        placeholder="e.g. Acme Corp"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-muted uppercase tracking-wider">Job Title</label>
+                      <input
+                        type="text"
+                        required
+                        value={guestJobTitle}
+                        onChange={e => setGuestJobTitle(e.target.value)}
+                        className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                        placeholder="e.g. Product Manager"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+        )}
+
         {/* Action Button */}
         {isSoldOut ? (
           <Button disabled variant="secondary" className="w-full py-4 text-base">
@@ -198,13 +281,13 @@ export default function EventRegistrationClient({
           </Button>
         ) : (
           <Button 
-            onClick={handleRegister} 
+            onClick={showGuestForm && !isLoggedIn ? () => document.getElementById('guest-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })) : handleRegister} 
             disabled={isPending} 
             variant="primary" 
             className="w-full py-4 text-base relative overflow-hidden group"
           >
             <span className="relative z-10 font-bold tracking-wide">
-              {isPending ? "Processing..." : !isLoggedIn ? "Login to Register" : isFree ? "Register Now →" : "Get Tickets →"}
+              {isPending ? "Processing..." : (!isLoggedIn && !showGuestForm) ? "Register as Guest →" : isFree ? "Complete Registration" : "Proceed to Payment"}
             </span>
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           </Button>

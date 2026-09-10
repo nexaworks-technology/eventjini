@@ -15,6 +15,11 @@ export default async function DashboardRootPage() {
   
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    const { redirect } = await import("next/navigation");
+    redirect('/login');
+  }
+
   // Temporary auto-migration for banners
   if (user) {
     const { data: missingEvents } = await supabase.from("events").select("id, title").eq("organizer_id", user.id).is("banner_url", null);
@@ -143,7 +148,7 @@ export default async function DashboardRootPage() {
           </div>
           <div className="space-y-3">
             {upcomingEvents.map((event: any) => {
-              const role = event.organizer_id === user.id ? 'owner' : teamMemberMap.get(event.id) as string;
+              const role = event.organizer_id === user?.id ? 'owner' : teamMemberMap.get(event.id) as string;
               const targetHref = role === 'scanner' ? `/dashboard/events/${event.id}/scanner` : `/dashboard/events/${event.id}`;
               
               return (

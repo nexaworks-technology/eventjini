@@ -14,10 +14,6 @@ const razorpay = new Razorpay({
 export async function createRazorpayOrder(eventId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
-  
-  // Verify user
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Unauthorized" };
 
   // Get event price
   const { data: event, error: eventError } = await supabase
@@ -33,7 +29,7 @@ export async function createRazorpayOrder(eventId: string) {
     const order = await razorpay.orders.create({
       amount: event.ticket_price_cents, // amount in paise
       currency: "INR",
-      receipt: `receipt_${eventId}_${user.id.substring(0, 5)}`,
+      receipt: `receipt_${eventId}_${crypto.randomBytes(4).toString("hex")}`,
     });
 
     return { 
@@ -54,14 +50,8 @@ export async function verifyPaymentAndRegister(
   razorpayOrderId: string,
   razorpayPaymentId: string,
   razorpaySignature: string,
-  jobTitle?: string,
-  companySize?: string
+  guestData?: any
 ) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Unauthorized" };
-
   // Verify Signature
   const body = razorpayOrderId + "|" + razorpayPaymentId;
   const expectedSignature = crypto
@@ -71,7 +61,7 @@ export async function verifyPaymentAndRegister(
 
   if (expectedSignature === razorpaySignature) {
     // Signature is valid, proceed to register
-    return await registerForEvent(eventId, jobTitle, companySize);
+    return await registerForEvent(eventId, guestData);
   } else {
     return { error: "Invalid payment signature" };
   }
