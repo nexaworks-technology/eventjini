@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { sendApplicationReceivedEmail } from "./emails";
 
 export async function registerForEvent(
   eventId: string, 
@@ -25,7 +26,7 @@ export async function registerForEvent(
     // 1. Fetch event to see if it requires approval or B2B data
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("requires_approval, require_b2b_data, is_paid")
+      .select("title, requires_approval, require_b2b_data, is_paid")
       .eq("id", eventId)
       .single();
 
@@ -95,6 +96,16 @@ export async function registerForEvent(
     if (regError) {
       console.error("Error creating registration:", regError);
       return { error: regError.message };
+    }
+
+    // Trigger Automated Emails
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://eventjini.com";
+    const toEmail = user?.email || guestData?.email;
+    const toName = user?.user_metadata?.full_name || guestData?.name || "Attendee";
+
+    if (status === "pending" && toEmail) {
+      // Fire and forget, don't await blocking the UI
+      sendApplicationReceivedEmail(toEmail, toName, event.title, ticketCode, appUrl);
     }
 
     revalidatePath("/my-tickets");

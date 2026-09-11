@@ -1,5 +1,7 @@
 "use server";
 
+import crypto from 'crypto';
+import { sendTicketApprovedEmail } from './emails';
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -105,6 +107,13 @@ export async function updateGuestStatus(registrationId: string, newStatus: strin
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   
+  // Fetch registration details before updating for the email
+  const { data: reg } = await supabase
+    .from('registrations')
+    .select('*, event:events(title, slug, is_paid), user:profiles(email, full_name)')
+    .eq('id', registrationId)
+    .single();
+
   const { error } = await supabase
     .from('registrations')
     .update({ 
@@ -116,6 +125,24 @@ export async function updateGuestStatus(registrationId: string, newStatus: strin
   if (error) {
     console.error('Error updating guest status:', error);
     return { error: error.message };
+  }
+  
+  if (newStatus === "approved" && reg) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://eventjini.com";
+    const toEmail = reg.user?.email || reg.guest_email;
+    const toName = reg.user?.full_name || reg.guest_name || "Attendee";
+    
+    if (toEmail) {
+      sendTicketApprovedEmail(
+        toEmail,
+        toName,
+        reg.event.title,
+        reg.event.slug,
+        reg.ticket_code,
+        reg.event.is_paid,
+        appUrl
+      );
+    }
   }
   
   revalidatePath('/dashboard/organizer/events/[id]/guests');
