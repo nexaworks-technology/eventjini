@@ -42,26 +42,17 @@ export default async function SponsorDashboardLayout({
   }
 
   return (
-    <div className="flex flex-col w-full h-full relative">
-      <div className="border-b border-white/5 bg-surface/50 backdrop-blur-xl sticky top-0 z-20">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <Link href="/dashboard/sponsor/portal" className="text-muted hover:text-white flex items-center gap-2 text-sm font-medium mb-1 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> Back to Portals
-            </Link>
-            <h1 className="text-xl font-bold text-white flex items-center gap-3">
-              {sponsorship.company_name || "Sponsor Profile"} 
-              <span className="text-sm font-normal text-muted bg-white/5 px-2 py-0.5 rounded border border-white/10">
-                {(sponsorship.tier as any)?.event?.title}
-              </span>
-            </h1>
-          </div>
-        </div>
-        <SponsorNavClient sponsorId={sponsorId} />
-      </div>
-      <div className="flex-1 flex overflow-hidden relative">
-        {children}
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <SponsorNavClient 
+        sponsorId={sponsorId} 
+        eventTitle={(sponsorship.tier as any)?.event?.title || "Unknown Event"} 
+        companyName={sponsorship.company_name || "Sponsor Profile"} 
+      />
+      
+      {/* Main Content (With left padding for the sidebar on desktop) */}
+      <main className="flex-1 w-full p-4 md:p-8 md:pl-72">
+        <div className="max-w-6xl mx-auto">{children}</div>
+      </main>
     </div>
   );
 }

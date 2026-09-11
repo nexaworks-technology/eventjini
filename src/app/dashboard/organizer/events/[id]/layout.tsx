@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { LayoutDashboard, Users, BarChart3, Radio, ScanLine, Shield, Zap, Settings, Building } from "lucide-react";
+import { EventNavClient } from "./event-nav-client";
 
 export default async function EventLayout({
   children,
@@ -60,54 +61,26 @@ export default async function EventLayout({
 
   // 2. Define all possible nav items and their allowed roles
   const allNavItems = [
-    { name: 'Overview', href: `/dashboard/events/${eventId}`, icon: LayoutDashboard, roles: ['owner', 'admin', 'finance'] },
-    { name: 'Guests', href: `/dashboard/events/${eventId}/guests`, icon: Users, roles: ['owner', 'admin'] },
-    { name: 'Sponsors', href: `/dashboard/events/${eventId}/sponsors/tiers`, icon: Building, roles: ['owner', 'admin'] },
-    { name: 'Analytics', href: `/dashboard/events/${eventId}/analytics`, icon: BarChart3, roles: ['owner', 'admin', 'finance'] },
-    { name: 'Scanner', href: `/dashboard/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
-    { name: 'Automations', href: `/dashboard/events/${eventId}/automations`, icon: Zap, roles: ['owner', 'admin'] },
-    { name: 'Team', href: `/dashboard/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
-    { name: 'Settings', href: `/dashboard/events/${eventId}/settings`, icon: Settings, roles: ['owner', 'admin'] },
+    { name: 'Overview', href: `/dashboard/organizer/events/${eventId}`, icon: LayoutDashboard, roles: ['owner', 'admin', 'finance'] },
+    { name: 'Guests', href: `/dashboard/organizer/events/${eventId}/guests`, icon: Users, roles: ['owner', 'admin'] },
+    { name: 'Sponsors', href: `/dashboard/organizer/events/${eventId}/sponsors/tiers`, icon: Building, roles: ['owner', 'admin'] },
+    { name: 'Analytics', href: `/dashboard/organizer/events/${eventId}/analytics`, icon: BarChart3, roles: ['owner', 'admin', 'finance'] },
+    { name: 'Scanner', href: `/dashboard/organizer/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
+    { name: 'Automations', href: `/dashboard/organizer/events/${eventId}/automations`, icon: Zap, roles: ['owner', 'admin'] },
+    { name: 'Team', href: `/dashboard/organizer/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
+    { name: 'Settings', href: `/dashboard/organizer/events/${eventId}/settings`, icon: Settings, roles: ['owner', 'admin'] },
   ];
 
   // Filter based on user role
   const navItems = allNavItems.filter(item => item.roles.includes(userRole as string));
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
-      {/* ── Command Center Header ── */}
-      <div className="sticky top-14 z-30 bg-canvas/90 backdrop-blur-xl border-b border-white/[0.04] px-6 py-3">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-white tracking-tight">
-              {event.title}
-            </h1>
-            <span className="px-2 py-0.5 rounded-full bg-brand-primary/10 text-[11px] font-semibold text-brand-primary border border-brand-primary/20">
-              Command Center
-            </span>
-          </div>
-          
-          <nav className="flex items-center overflow-x-auto no-scrollbar gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-white/[0.04] text-muted hover:text-white whitespace-nowrap"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <EventNavClient navItems={navItems} eventTitle={event.title} />
 
-      {/* Main Content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto p-6">
-        {children}
+      {/* Main Content (With left padding for the sidebar on desktop) */}
+      <main className="flex-1 w-full p-4 md:p-8 md:pl-72">
+        <div className="max-w-6xl mx-auto">{children}</div>
       </main>
     </div>
   );
