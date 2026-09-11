@@ -5,9 +5,15 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ArrowLeft, LayoutDashboard, Users, BarChart3, ScanLine, Shield, Zap, Settings, Building } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function EventNavClient({ eventId, userRole, eventTitle }: { eventId: string, userRole: string, eventTitle: string }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const allNavItems = [
     { name: 'Overview', href: `/dashboard/organizer/events/${eventId}`, icon: LayoutDashboard, roles: ['owner', 'admin', 'finance'] },
@@ -56,7 +62,7 @@ export function EventNavClient({ eventId, userRole, eventTitle }: { eventId: str
                   : "text-muted hover:text-white hover:bg-white/[0.03]"
               )}
             >
-              {isActive && (
+              {mounted && isActive && (
                 <motion.div
                   layoutId="event-nav-indicator"
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-primary rounded-r-full"
