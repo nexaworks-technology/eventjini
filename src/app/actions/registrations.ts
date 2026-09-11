@@ -26,12 +26,25 @@ export async function registerForEvent(
     // 1. Fetch event to see if it requires approval or B2B data
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("title, requires_approval, require_b2b_data, is_paid")
+      .select("title, requires_approval, require_b2b_data, is_paid, capacity")
       .eq("id", eventId)
       .single();
 
     if (eventError || !event) {
       return { error: "Event not found" };
+    }
+
+    // 1.5 Check Capacity
+    if (event.capacity) {
+      const { count } = await supabase
+        .from("registrations")
+        .select("*", { count: 'exact', head: true })
+        .eq("event_id", eventId)
+        .in("status", ["approved", "checked_in"]);
+      
+      if (count !== null && count >= event.capacity) {
+        return { error: "Event is sold out." };
+      }
     }
 
     // 2. Check if user/email is already registered

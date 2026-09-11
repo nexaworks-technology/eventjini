@@ -44,8 +44,14 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const supabase = createClient(cookieStore);
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Assuming registeredCount isn't fully implemented in DB yet, using 0 for now.
-  const registeredCount = 0;
+  // Fetch registered count (count all valid registrations: approved or checked_in)
+  const { count } = await supabase
+    .from("registrations")
+    .select("*", { count: 'exact', head: true })
+    .eq("event_id", event.id)
+    .in("status", ["approved", "checked_in"]);
+
+  const registeredCount = count || 0;
   const isSoldOut = event.capacity ? registeredCount >= event.capacity : false;
   const isFree = !event.is_paid;
   const priceFormatted = event.ticket_price_cents ? (event.ticket_price_cents / 100).toFixed(2) : "0";
