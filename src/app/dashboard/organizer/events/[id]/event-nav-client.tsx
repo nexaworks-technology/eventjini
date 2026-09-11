@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, LayoutDashboard, Users, BarChart3, ScanLine, Shield, Zap, Settings, Building } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Users, BarChart3, ScanLine, Shield, Zap, Settings, Building, Send } from "lucide-react";
 
 export function EventNavClient({ eventId, userRole, eventTitle }: { eventId: string, userRole: string, eventTitle: string }) {
   const pathname = usePathname();
@@ -14,6 +14,7 @@ export function EventNavClient({ eventId, userRole, eventTitle }: { eventId: str
     { name: 'Sponsors', href: `/dashboard/organizer/events/${eventId}/sponsors/tiers`, icon: Building, roles: ['owner', 'admin'] },
     { name: 'Analytics', href: `/dashboard/organizer/events/${eventId}/analytics`, icon: BarChart3, roles: ['owner', 'admin', 'finance'] },
     { name: 'Scanner', href: `/dashboard/organizer/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
+    { name: 'Broadcast', href: `/dashboard/organizer/events/${eventId}/broadcast`, icon: Send, roles: ['owner', 'admin'] },
     { name: 'Automations', href: `/dashboard/organizer/events/${eventId}/automations`, icon: Zap, roles: ['owner', 'admin'] },
     { name: 'Team', href: `/dashboard/organizer/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
     { name: 'Settings', href: `/dashboard/organizer/events/${eventId}/settings`, icon: Settings, roles: ['owner', 'admin'] },
