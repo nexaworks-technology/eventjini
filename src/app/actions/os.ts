@@ -139,6 +139,7 @@ export async function updateRegistrationSettings(eventId: string, requireB2b: bo
   }
   
   revalidatePath('/dashboard/organizer/events/[id]/guests');
+  revalidatePath('/e/[slug]', 'page');
   return { success: true };
 }
 

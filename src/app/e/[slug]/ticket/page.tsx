@@ -5,6 +5,7 @@ import { FadeInUp } from "@/components/animations/motion";
 import { Calendar, MapPin, CheckCircle2, User, Clock } from "lucide-react";
 import { AddToCalendar } from "@/components/ui/add-to-calendar";
 import { ClaimPaymentButton } from "./claim-payment-button";
+import { DownloadTicketButton } from "./download-ticket-button";
 
 interface TicketPageProps {
   params: Promise<{ slug: string }>;
@@ -38,7 +39,7 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
         </div>
 
         {/* Ticket Container */}
-        <div className="rounded-3xl overflow-hidden border border-white/[0.06] bg-surface shadow-2xl">
+        <div id="ticket-container" className="rounded-3xl overflow-hidden border border-white/[0.06] bg-surface shadow-2xl relative">
           
           {/* ── Top: Event Details (Dark) ── */}
           <div className="p-8 space-y-6">
@@ -54,7 +55,7 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
                 <User className="w-4 h-4 text-brand-secondary mt-1 shrink-0" />
                 <div>
                   <p className="text-[11px] text-muted/50 uppercase tracking-widest mb-0.5">Attendee</p>
-                  <p className="text-sm font-medium text-white">{ticket.user?.full_name || ticket.user?.email || "Attendee"}</p>
+                  <p className="text-sm font-medium text-white">{ticket.user?.full_name || ticket.guest_name || ticket.user?.email || ticket.guest_email || "Attendee"}</p>
                 </div>
               </div>
 
@@ -134,10 +135,32 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
           </div>
         </div>
 
-        {/* Calendar Button — Below the Ticket */}
-        {ticket.event && ticket.status !== 'pending' && ticket.payment_status !== 'unpaid' && (
-          <FadeInUp delay={0.2} className="mt-6">
-            <AddToCalendar event={ticket.event} />
+        {/* Action Buttons — Below the Ticket */}
+        <div className="mt-6 flex flex-col gap-3">
+          {ticket.status !== 'pending' && ticket.payment_status !== 'unpaid' && (
+            <FadeInUp delay={0.2} className="w-full">
+              <DownloadTicketButton 
+                elementId="ticket-container" 
+                filename={`eventjini_ticket_${ticket.ticket_code}`} 
+              />
+            </FadeInUp>
+          )}
+
+          {ticket.event && ticket.status !== 'pending' && ticket.payment_status !== 'unpaid' && (
+            <FadeInUp delay={0.3} className="w-full">
+              <AddToCalendar event={ticket.event} />
+            </FadeInUp>
+          )}
+        </div>
+
+        {/* Guest Auth Prompt */}
+        {!ticket.user_id && (
+          <FadeInUp delay={0.4} className="mt-8 pt-8 border-t border-white/10 text-center">
+            <h4 className="text-sm font-semibold text-white mb-2">Want to manage your tickets?</h4>
+            <p className="text-xs text-muted mb-4">Create an account with <span className="text-brand-primary">{ticket.guest_email}</span> to save this ticket to your wallet.</p>
+            <a href={`/register?email=${encodeURIComponent(ticket.guest_email || '')}`} className="text-xs font-bold text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+              Create Free Account
+            </a>
           </FadeInUp>
         )}
       </FadeInUp>
