@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { LayoutDashboard, Users, BarChart3, Radio, ScanLine, Shield, Zap, Settings, Building } from "lucide-react";
 import { EventNavClient } from "./event-nav-client";
 
 export default async function EventLayout({
@@ -59,24 +58,9 @@ export default async function EventLayout({
     redirect('/dashboard');
   }
 
-  // 2. Define all possible nav items and their allowed roles
-  const allNavItems = [
-    { name: 'Overview', href: `/dashboard/organizer/events/${eventId}`, icon: LayoutDashboard, roles: ['owner', 'admin', 'finance'] },
-    { name: 'Guests', href: `/dashboard/organizer/events/${eventId}/guests`, icon: Users, roles: ['owner', 'admin'] },
-    { name: 'Sponsors', href: `/dashboard/organizer/events/${eventId}/sponsors/tiers`, icon: Building, roles: ['owner', 'admin'] },
-    { name: 'Analytics', href: `/dashboard/organizer/events/${eventId}/analytics`, icon: BarChart3, roles: ['owner', 'admin', 'finance'] },
-    { name: 'Scanner', href: `/dashboard/organizer/events/${eventId}/scanner`, icon: ScanLine, roles: ['owner', 'admin', 'scanner'] },
-    { name: 'Automations', href: `/dashboard/organizer/events/${eventId}/automations`, icon: Zap, roles: ['owner', 'admin'] },
-    { name: 'Team', href: `/dashboard/organizer/events/${eventId}/team`, icon: Shield, roles: ['owner', 'admin'] },
-    { name: 'Settings', href: `/dashboard/organizer/events/${eventId}/settings`, icon: Settings, roles: ['owner', 'admin'] },
-  ];
-
-  // Filter based on user role
-  const navItems = allNavItems.filter(item => item.roles.includes(userRole as string));
-
   return (
     <div className="flex flex-col min-h-screen">
-      <EventNavClient navItems={navItems} eventTitle={event.title} />
+      <EventNavClient eventId={eventId} userRole={userRole} eventTitle={event.title} />
 
       {/* Main Content (With left padding for the sidebar on desktop) */}
       <main className="flex-1 w-full p-4 md:p-8 md:pl-72">
