@@ -174,6 +174,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
                   registeredCount={registeredCount}
                   isLoggedIn={!!user}
                   requireB2bData={event.require_b2b_data || false}
+                  requiresApproval={event.requires_approval || false}
                   trackingLinkId={trackingLinkId}
                 />
               </div>

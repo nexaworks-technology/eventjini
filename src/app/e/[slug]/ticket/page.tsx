@@ -2,8 +2,9 @@ import { getTicketByCode } from "@/app/actions/registrations";
 import { notFound } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { FadeInUp } from "@/components/animations/motion";
-import { Calendar, MapPin, CheckCircle2, User } from "lucide-react";
+import { Calendar, MapPin, CheckCircle2, User, Clock } from "lucide-react";
 import { AddToCalendar } from "@/components/ui/add-to-calendar";
+import { ClaimPaymentButton } from "./claim-payment-button";
 
 interface TicketPageProps {
   params: Promise<{ slug: string }>;
@@ -91,27 +92,50 @@ export default async function TicketPage({ params, searchParams }: TicketPagePro
             <div className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-canvas" />
           </div>
 
-          {/* ── Bottom: QR Code (White — Maximum Scannability) ── */}
-          <div className="bg-white p-8 flex flex-col items-center">
-            <QRCodeSVG
-              value={ticket.ticket_code}
-              size={220}
-              level="H"
-              includeMargin={false}
-              fgColor="#000000"
-              bgColor="#ffffff"
-            />
-            <p className="font-mono text-sm tracking-[0.25em] text-gray-500 mt-5 uppercase">
-              {ticket.ticket_code}
-            </p>
-            <p className="text-[11px] text-gray-400 mt-1">
-              Scan this at the entrance
-            </p>
+          {/* ── Bottom: QR Code or Pending Message ── */}
+          <div className="bg-white p-8 flex flex-col items-center min-h-[300px] justify-center">
+            {ticket.status === 'pending' ? (
+              <div className="text-center space-y-4 max-w-xs">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Clock className="w-8 h-8 text-amber-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">Application Under Review</h3>
+                <p className="text-sm text-slate-500">
+                  The organizer is reviewing your application. You will be notified by email once approved.
+                </p>
+                <p className="font-mono text-xs tracking-[0.2em] text-gray-400 mt-6 uppercase">
+                  REF: {ticket.ticket_code}
+                </p>
+              </div>
+            ) : ticket.status === 'approved' && ticket.payment_status === 'unpaid' && ticket.event?.is_paid ? (
+              <ClaimPaymentButton 
+                eventId={ticket.event.id}
+                ticketCode={ticket.ticket_code}
+                priceCents={ticket.event.ticket_price_cents}
+              />
+            ) : (
+              <>
+                <QRCodeSVG
+                  value={ticket.ticket_code}
+                  size={220}
+                  level="H"
+                  includeMargin={false}
+                  fgColor="#000000"
+                  bgColor="#ffffff"
+                />
+                <p className="font-mono text-sm tracking-[0.25em] text-gray-500 mt-5 uppercase">
+                  {ticket.ticket_code}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Scan this at the entrance
+                </p>
+              </>
+            )}
           </div>
         </div>
 
         {/* Calendar Button — Below the Ticket */}
-        {ticket.event && (
+        {ticket.event && ticket.status !== 'pending' && ticket.payment_status !== 'unpaid' && (
           <FadeInUp delay={0.2} className="mt-6">
             <AddToCalendar event={ticket.event} />
           </FadeInUp>

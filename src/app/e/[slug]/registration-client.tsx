@@ -24,8 +24,9 @@ interface EventRegistrationClientProps {
   capacity: number;
   registeredCount: number;
   isLoggedIn: boolean;
-  requireB2bData: boolean;
-  trackingLinkId: string | null;
+  requireB2bData?: boolean;
+  requiresApproval?: boolean;
+  trackingLinkId?: string | null;
 }
 
 export default function EventRegistrationClient({
@@ -37,6 +38,7 @@ export default function EventRegistrationClient({
   registeredCount,
   isLoggedIn,
   requireB2bData,
+  requiresApproval,
   trackingLinkId,
 }: EventRegistrationClientProps) {
   const router = useRouter();
@@ -94,7 +96,7 @@ export default function EventRegistrationClient({
         guestData = undefined; // For backward compatibility if neither exist
       }
 
-      if (isFree) {
+      if (isFree || requiresApproval) {
         const res = await registerForEvent(eventId, guestData);
         if (res.error) {
           setError(res.error);
@@ -297,7 +299,15 @@ export default function EventRegistrationClient({
             className="w-full py-4 text-base relative overflow-hidden group"
           >
             <span className="relative z-10 font-bold tracking-wide">
-              {isPending ? "Processing..." : (!isLoggedIn && !showGuestForm) ? "Register as Guest →" : isFree ? "Complete Registration" : "Proceed to Payment"}
+              {isPending 
+                ? "Processing..." 
+                : (!isLoggedIn && !showGuestForm) 
+                  ? (requiresApproval ? "Apply as Guest →" : "Register as Guest →")
+                  : requiresApproval 
+                    ? "Submit Application" 
+                    : isFree 
+                      ? "Complete Registration" 
+                      : "Proceed to Payment"}
             </span>
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           </Button>

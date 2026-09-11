@@ -25,7 +25,7 @@ export async function registerForEvent(
     // 1. Fetch event to see if it requires approval or B2B data
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("requires_approval, require_b2b_data")
+      .select("requires_approval, require_b2b_data, is_paid")
       .eq("id", eventId)
       .single();
 
@@ -53,6 +53,12 @@ export async function registerForEvent(
     // 3. Generate a unique ticket code
     const ticketCode = crypto.randomBytes(4).toString("hex").toUpperCase();
     const status = event.requires_approval ? "pending" : "approved";
+    
+    // Determine payment_status
+    let payment_status = "paid"; // default to paid (for free events or auto-approved paid events that just ran razorpay)
+    if (event.is_paid && event.requires_approval) {
+      payment_status = "unpaid";
+    }
 
     // 4. Create the registration payload
     const payload: any = {
@@ -60,6 +66,7 @@ export async function registerForEvent(
       status,
       approval_status: event.requires_approval ? 'pending' : 'auto_approved',
       ticket_code: ticketCode,
+      payment_status,
     };
 
     if (user) {

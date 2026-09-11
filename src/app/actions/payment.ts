@@ -67,6 +67,37 @@ export async function verifyPaymentAndRegister(
   }
 }
 
+export async function completeTicketPayment(
+  ticketCode: string,
+  razorpayOrderId: string,
+  razorpayPaymentId: string,
+  razorpaySignature: string
+) {
+  const body = razorpayOrderId + "|" + razorpayPaymentId;
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+    .update(body.toString())
+    .digest("hex");
+
+  if (expectedSignature !== razorpaySignature) {
+    return { error: "Invalid payment signature" };
+  }
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from("registrations")
+    .update({ payment_status: "paid" })
+    .eq("ticket_code", ticketCode);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
 export async function createSponsorRazorpayOrder(tierId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);

@@ -107,7 +107,10 @@ export async function updateGuestStatus(registrationId: string, newStatus: strin
   
   const { error } = await supabase
     .from('registrations')
-    .update({ approval_status: newStatus })
+    .update({ 
+      approval_status: newStatus,
+      status: newStatus 
+    })
     .eq('id', registrationId);
 
   if (error) {
