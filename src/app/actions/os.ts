@@ -115,7 +115,7 @@ export async function updateGuestStatus(registrationId: string, newStatus: strin
     return { error: error.message };
   }
   
-  revalidatePath('/dashboard/events/[id]/guests');
+  revalidatePath('/dashboard/organizer/events/[id]/guests');
   return { success: true };
 }
 
@@ -135,7 +135,7 @@ export async function updateRegistrationSettings(eventId: string, requireB2b: bo
     return { error: error.message };
   }
   
-  revalidatePath('/dashboard/events/[id]/guests');
+  revalidatePath('/dashboard/organizer/events/[id]/guests');
   return { success: true };
 }
 
@@ -171,7 +171,7 @@ export async function createTask(data: { event_id: string; title: string; descri
     throw new Error(error.message);
   }
 
-  revalidatePath('/dashboard/events/[id]/tasks', 'page');
+  revalidatePath('/dashboard/organizer/events/[id]/tasks', 'page');
   return task;
 }
 
@@ -188,7 +188,7 @@ export async function updateTaskStatus(taskId: string, status: string) {
     throw new Error(error.message);
   }
 
-  revalidatePath('/dashboard/events/[id]/tasks', 'page');
+  revalidatePath('/dashboard/organizer/events/[id]/tasks', 'page');
   return { success: true };
 }
 
@@ -299,7 +299,7 @@ export async function updateEventDetails(eventId: string, formData: FormData) {
       return { error: error.message };
     }
 
-    revalidatePath(`/dashboard/events/${eventId}/settings`);
+    revalidatePath(`/dashboard/organizer/events/${eventId}/settings`);
     revalidatePath(`/e/[slug]`, 'page'); // Can't easily know slug here, but it's fine
     return { success: true };
   } catch (err: any) {

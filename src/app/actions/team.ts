@@ -74,7 +74,7 @@ export async function addTeamMember(eventId: string, email: string, role: string
     return { error: error.message };
   }
   
-  revalidatePath(`/dashboard/events/${eventId}/team`);
+  revalidatePath(`/dashboard/organizer/events/${eventId}/team`);
   return { success: true };
 }
 
@@ -92,6 +92,6 @@ export async function removeTeamMember(eventId: string, memberId: string) {
     return { error: error.message };
   }
   
-  revalidatePath(`/dashboard/events/${eventId}/team`);
+  revalidatePath(`/dashboard/organizer/events/${eventId}/team`);
   return { success: true };
 }

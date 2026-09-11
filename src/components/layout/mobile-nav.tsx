@@ -4,16 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, Settings, Building2, Ticket, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 
 export function MobileNav({ hasEvents = false, hasSponsorships = false }: { hasEvents?: boolean, hasSponsorships?: boolean }) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Unified Smart Navigation Links
   const links = [
@@ -49,12 +42,8 @@ export function MobileNav({ hasEvents = false, hasSponsorships = false }: { hasE
                 isActive ? "text-brand-primary" : "text-muted hover:text-white"
               )}
             >
-              {mounted && isActive && (
-                <motion.div
-                  layoutId="mobile-indicator"
-                  className="absolute top-0 inset-x-4 h-0.5 bg-brand-primary rounded-b-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
+              {isActive && (
+                <div className="absolute top-0 inset-x-4 h-0.5 bg-brand-primary rounded-b-full" />
               )}
               <Icon className="w-5 h-5" />
               <span className="text-[10px] font-medium tracking-wide">{link.name}</span>

@@ -4,17 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, Settings, Building2, Ticket, Rocket, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
 
 export function Sidebar({ hasEvents = false, hasSponsorships = false }: { hasEvents?: boolean, hasSponsorships?: boolean }) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Unified Smart Navigation Links
   const links = [
@@ -63,12 +56,8 @@ export function Sidebar({ hasEvents = false, hasSponsorships = false }: { hasEve
                   : "text-muted hover:text-white hover:bg-white/[0.03]"
               )}
             >
-              {mounted && isActive && (
-                <motion.div
-                  layoutId="sidebar-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-primary rounded-r-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-primary rounded-r-full" />
               )}
               <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-brand-primary" : "text-muted")} />
               {link.name}

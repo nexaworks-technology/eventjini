@@ -6,5 +6,5 @@ export default async function SponsorsRootPage({
   params: Promise<{ id: string }> | { id: string };
 }) {
   const resolvedParams = await Promise.resolve(params);
-  redirect(`/dashboard/events/${resolvedParams.id}/sponsors/tiers`);
+  redirect(`/dashboard/organizer/events/${resolvedParams.id}/sponsors/tiers`);
 }

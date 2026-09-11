@@ -4,16 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { QrCode, Users, Settings, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 
 export function SponsorNavClient({ sponsorId, eventTitle, companyName }: { sponsorId: string, eventTitle: string, companyName: string }) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   
   const tabs = [
     { name: 'Overview', href: `/dashboard/sponsor/portal/${sponsorId}`, icon: Settings },
@@ -53,12 +46,8 @@ export function SponsorNavClient({ sponsorId, eventTitle, companyName }: { spons
                   : "text-muted hover:text-white hover:bg-white/[0.03]"
               )}
             >
-              {mounted && isActive && (
-                <motion.div
-                  layoutId="sponsor-nav-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-primary rounded-r-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-primary rounded-r-full" />
               )}
               <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-brand-primary" : "text-muted")} />
               {tab.name}

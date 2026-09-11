@@ -16,8 +16,8 @@ export default function SponsorsLayout({
   const eventId = params.id as string;
 
   const tabs = [
-    { name: "Tiers Builder", href: `/dashboard/events/${eventId}/sponsors/tiers`, icon: Layers },
-    { name: "Sponsor Analytics", href: `/dashboard/events/${eventId}/sponsors/analytics`, icon: BarChart3 },
+    { name: "Tiers Builder", href: `/dashboard/organizer/events/${eventId}/sponsors/tiers`, icon: Layers },
+    { name: "Sponsor Analytics", href: `/dashboard/organizer/events/${eventId}/sponsors/analytics`, icon: BarChart3 },
   ];
 
   return (
