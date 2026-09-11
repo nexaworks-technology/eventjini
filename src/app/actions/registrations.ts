@@ -15,7 +15,8 @@ export async function registerForEvent(
     jobTitle?: string;
     isStudent?: boolean;
     college?: string;
-    trackingLinkId?: string;
+    trackingLinkId?: string | null;
+    customData?: any;
   }
 ) {
   try {
@@ -98,6 +99,9 @@ export async function registerForEvent(
       payload.guest_job_title = guestData.jobTitle;
       payload.guest_is_student = guestData.isStudent;
       payload.guest_college = guestData.college;
+      if (guestData.customData) {
+        payload.custom_data = guestData.customData;
+      }
     }
 
     const { data: registration, error: regError } = await supabase

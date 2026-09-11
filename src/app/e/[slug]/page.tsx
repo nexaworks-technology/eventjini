@@ -56,6 +56,13 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const isFree = !event.is_paid;
   const priceFormatted = event.ticket_price_cents ? (event.ticket_price_cents / 100).toFixed(2) : "0";
 
+  // Fetch Custom Fields
+  const { data: customFields } = await supabase
+    .from("event_custom_fields")
+    .select("*")
+    .eq("event_id", event.id)
+    .order("order_index", { ascending: true });
+
   return (
     <main className="min-h-screen bg-canvas text-white overflow-x-hidden selection:bg-brand-primary/30">
       <Header />
@@ -182,6 +189,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
                   requireB2bData={event.require_b2b_data || false}
                   requiresApproval={event.requires_approval || false}
                   trackingLinkId={trackingLinkId}
+                  customFields={customFields || []}
                 />
               </div>
             </FadeInUp>

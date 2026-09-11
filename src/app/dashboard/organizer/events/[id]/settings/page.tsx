@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import SettingsClient from "./settings-client";
+import CustomFormsClient from "./custom-forms-client";
+import { getCustomFields } from "@/app/actions/custom-forms";
 
 interface SettingsPageProps {
   params: Promise<{ id: string }>;
@@ -20,6 +22,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   if (!event) {
     return <div className="p-8 text-white">Event not found.</div>;
   }
+  
+  const customFields = await getCustomFields(event.id);
 
   return (
     <div className="flex-1 p-8 overflow-y-auto w-full max-w-4xl">
@@ -27,6 +31,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       <p className="text-muted mb-8">Update your event details and configurations.</p>
       
       <SettingsClient event={event} />
+      
+      <CustomFormsClient eventId={event.id} initialFields={customFields} />
     </div>
   );
 }

@@ -27,6 +27,7 @@ interface EventRegistrationClientProps {
   requireB2bData?: boolean;
   requiresApproval?: boolean;
   trackingLinkId?: string | null;
+  customFields?: any[];
 }
 
 export default function EventRegistrationClient({
@@ -40,29 +41,33 @@ export default function EventRegistrationClient({
   requireB2bData,
   requiresApproval,
   trackingLinkId,
+  customFields = [],
 }: EventRegistrationClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   // Guest Data State
-  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
   const [guestCompany, setGuestCompany] = useState("");
   const [guestJobTitle, setGuestJobTitle] = useState("");
   const [isStudent, setIsStudent] = useState(false);
   const [guestCollege, setGuestCollege] = useState("");
+  const [customData, setCustomData] = useState<Record<string, any>>({});
   
+  const needsForm = !isLoggedIn || requireB2bData || customFields.length > 0;
+
   const handleRegister = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    if (!isLoggedIn && !showGuestForm) {
-      setShowGuestForm(true);
+    if (needsForm && !showForm) {
+      setShowForm(true);
       return;
     }
 
-    if (!isLoggedIn && showGuestForm) {
+    if (needsForm && showForm) {
       if (!guestEmail || !guestName) {
         setError("Email and Name are required.");
         return;
@@ -79,7 +84,7 @@ export default function EventRegistrationClient({
 
     setError(null);
     startTransition(async () => {
-      let guestData: any = !isLoggedIn ? {
+      let guestData: any = needsForm ? {
         email: guestEmail,
         name: guestName,
         company: guestCompany,
@@ -93,7 +98,8 @@ export default function EventRegistrationClient({
       }
       
       if (isLoggedIn && !trackingLinkId) {
-        guestData = undefined; // For backward compatibility if neither exist
+        guestData.customData = customData;
+        if (!trackingLinkId && !requireB2bData && customFields.length === 0) guestData = undefined;
       }
 
       if (isFree || requiresApproval) {
@@ -202,34 +208,36 @@ export default function EventRegistrationClient({
         )}
 
         {/* Guest Form */}
-        {showGuestForm && !isLoggedIn && (
+        {showForm && (
           <form id="guest-form" onSubmit={handleRegister} className="w-full space-y-4 mb-8">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Guest Details</h4>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Attendee Details</h4>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted uppercase tracking-wider">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={guestName}
-                  onChange={e => setGuestName(e.target.value)}
-                  className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
-                  placeholder="John Doe"
-                />
+            {!isLoggedIn && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={guestName}
+                    onChange={e => setGuestName(e.target.value)}
+                    className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={guestEmail}
+                    onChange={e => setGuestEmail(e.target.value)}
+                    className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                    placeholder="john@example.com"
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted uppercase tracking-wider">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={guestEmail}
-                  onChange={e => setGuestEmail(e.target.value)}
-                  className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
-                  placeholder="john@example.com"
-                />
-              </div>
-            </div>
+            )}
 
             {requireB2bData && (
               <div className="pt-4 border-t border-white/5 space-y-4">
@@ -283,6 +291,61 @@ export default function EventRegistrationClient({
                 )}
               </div>
             )}
+          
+            {customFields.length > 0 && (
+              <div className="pt-4 border-t border-white/5 space-y-4">
+                {customFields.map((field) => (
+                  <div key={field.id} className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+                      {field.field_label} {field.is_required && <span className="text-brand-primary">*</span>}
+                    </label>
+                    {field.field_type === 'text' && (
+                      <input
+                        type="text"
+                        required={field.is_required}
+                        value={customData[field.field_name] || ''}
+                        onChange={e => setCustomData(prev => ({ ...prev, [field.field_name]: e.target.value }))}
+                        className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                      />
+                    )}
+                    {field.field_type === 'long_text' && (
+                      <textarea
+                        required={field.is_required}
+                        value={customData[field.field_name] || ''}
+                        onChange={e => setCustomData(prev => ({ ...prev, [field.field_name]: e.target.value }))}
+                        className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors"
+                      />
+                    )}
+                    {field.field_type === 'select' && (
+                      <select
+                        required={field.is_required}
+                        value={customData[field.field_name] || ''}
+                        onChange={e => setCustomData(prev => ({ ...prev, [field.field_name]: e.target.value }))}
+                        className="w-full bg-surface border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
+                      >
+                        <option value="">Select an option...</option>
+                        {field.options?.map((opt: string) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    )}
+                    {field.field_type === 'checkbox' && (
+                      <label className="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/[0.02] cursor-pointer hover:bg-white/[0.04] transition-colors">
+                        <input
+                          type="checkbox"
+                          required={field.is_required}
+                          checked={customData[field.field_name] || false}
+                          onChange={e => setCustomData(prev => ({ ...prev, [field.field_name]: e.target.checked }))}
+                          className="w-4 h-4 rounded bg-surface border-white/20 text-brand-primary focus:ring-brand-primary/50"
+                        />
+                        <span className="text-sm font-medium text-white">Yes</span>
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
           </form>
         )}
 
@@ -293,7 +356,7 @@ export default function EventRegistrationClient({
           </Button>
         ) : (
           <Button 
-            onClick={showGuestForm && !isLoggedIn ? () => document.getElementById('guest-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })) : handleRegister} 
+            onClick={showForm ? () => document.getElementById('guest-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })) : handleRegister} 
             disabled={isPending} 
             variant="primary" 
             className="w-full py-4 text-base relative overflow-hidden group"
@@ -301,7 +364,7 @@ export default function EventRegistrationClient({
             <span className="relative z-10 font-bold tracking-wide">
               {isPending 
                 ? "Processing..." 
-                : (!isLoggedIn && !showGuestForm) 
+                : (needsForm && !showForm) 
                   ? (requiresApproval ? "Apply as Guest →" : "Register as Guest →")
                   : requiresApproval 
                     ? "Submit Application" 
